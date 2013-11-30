@@ -609,79 +609,88 @@ class ShellScript
     
     
     
-    function debug ($message = '', $verbosityLevel = 0) {
-      /** PRIVATE
-        *   Outputs a message to the debug log defined by
-        *     the $this->debugLogFilename property if debug
-        *     mode is turned on ($this->debugMode == true).
-        *   If $message == '' then the $this->errorMsg and
-        *     $this->errorType properties are used to generate
-        *     the debug entry.
-        *   $verbosityLevel works with the $this->debugVerboseKey
-        *     property to specify how many messages should be
-        *     added to the debug log. $this->debugVerboseKey
-        *     references a value in $this->configOptions to
-        *     determine how much the user wants to see in the
-        *     debug log. If $verbosityLevel is less than or
-        *     equal to the level the user specified, then the
-        *     message is added to the debug log.
-        */
-      
-      // see if debug mode is enabled
-      if ($this->debugMode) {
-        // indicate if we are outputting the message or not, yes by default
-        $outputMsg = true;
+    /**
+     * Write a debug message to the debugging file
+     * 
+     * Outputs a message to the debug log defined by self::debugLogFilename
+     * if debug mode is turned on (i.e., self::debugMode == true)
+     *
+     * If $message == '' then self::errorMsg and self::errorType are used to
+     * generate the debug entry
+     *
+     * The $verbosityLevel parameter works with self::debugVerboseKey to
+     * specify which messages should be output to the debug log.
+     * self::debugVerboseKey references a value in self::configOptions to
+     * determine how much detail the user wants in the debug log. If
+     * $verbosityLevel is less than or equal to the user-specified level, then
+     * the message is added to the debug log.
+     *
+     * @param      string  $message         a string containing the message
+     *                                      to write into the debug log
+     * @param      integer $verbosityLevel  an integer indicating the minimum
+     *                                      verbosity level required to write
+     *                                      the message to the debug log
+     * @return     void
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      30 November 2013
+     * @since      30 December 2009
+     */
+    protected function debug ($message = '', $verbosityLevel = 0)
+    {
+        // see if debug mode is enabled
+        if ($this->debugMode) {
+            // indicate if we are outputting the message, yes by default
+            $outputMsg = true;
         
-        // has a verbosity level been specified
-        if ($verbosityLevel > 0) {
-          // assume the message will not be output unless the settings prove otherwise
-          $outputMsg = false;
-          
-          // see if a verbosity level has been specified
-          if ($this->debugVerboseKey <> '' && isset($this->configOptions[$this->debugVerboseKey]) && 
-              is_numeric($this->configOptions[$this->debugVerboseKey])) {
-            // is the verbosity level for this message above the threshold
-            if ($verbosityLevel <= $this->configOptions[$this->debugVerboseKey]) {
-              $outputMsg = true;
+            // if a message verbosity level is specified, see if it meets
+            // the threshold to be added to the debug log
+            if ($verbosityLevel > 0) {
+                // don't output unless the message verbosity level is equal to
+                // or below the script threshold
+                $outputMsg = false;
+
+                // determine if there is a script-wide verbosity threshold
+                if ($this->debugVerboseKey <> ''
+                    && isset($this->configOptions[$this->debugVerboseKey])
+                    && is_numeric($this->configOptions[$this->debugVerboseKey])
+                ) {
+                    // is the message verbosity level above the threshold
+                    if ($verbosityLevel <= $this->configOptions[$this->debugVerboseKey]) {
+                        $outputMsg = true;
+                    }
+                }
             }
-          }
-        }
         
-        // are we outputting a message
-        if ($outputMsg) {
-          // are we outputting a message passed to the method or the
-          //   one stored in the $this->errorMsg property?
-          if (!isset($message) || $message == '') {
-            $message = $this->errorMsg;
-          }
-          
-          // remove any carriage returns from the message
-          $message = str_replace("\n", '', $message);
-          $message = str_replace("\r", '', $message);
-          
-          // add a date/time stamp to the beginning of the message
-          //   and a carriage return at the end
-          $stamp = '['.date('Y-m-d H:i:s').'] ';
-          $message = $stamp.$message."\n";
-          
-          // output the debug message to the file
-          if (function_exists('file_put_contents')) {
-            // the easy way suppoted in PHP5
-            file_put_contents($this->debugLogFilename, $message, FILE_APPEND);
-            
-          } else {
-            // the hard / PHP4 way
-            $FH = fopen($this->debugLogFilename, 'a');
-            if ($FH) {
-              fwrite($FH, $message);
-              fclose($FH);
+        
+            if ($outputMsg) {
+                // use self::errorMsg if $message is blank
+                if (!isset($message) || $message == '') {
+                    $message = $this->errorMsg;
+                }
+              
+                // remove any carriage returns from the message
+                $message = str_replace("\n", '', $message);
+                $message = str_replace("\r", '', $message);
+
+                // apply an indent based on the verbosity level
+                for ($i = 2; $i <= $verbosityLevel; $i++) {
+                    $message = '    '.$message;
+                }
+              
+                // add a date/time stamp and carriage return
+                $stamp = '['.date('Y-m-d H:i:s').'] ';
+                $message = $stamp.$message."\n";
+              
+                // output the debug message to the file
+                file_put_contents(
+                    $this->debugLogFilename,
+                    $message,
+                    FILE_APPEND
+                );
             }
-            unset($FH);
-          }
         }
-      }
-      
-    }  // end of function debug
+    }
     
     
     
