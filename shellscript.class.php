@@ -142,41 +142,51 @@ class ShellScript
      */
     protected $validConfigOptions = array();
     
+
     
-   
-    function ShellScript () {
-      /** PUBLIC Constructor:
-        *   Initializes the class properties
-        */
-      
-      $this->debug('ShellScript() called', 1);
-      
-      // initialize the configuration options
-      $this->debug('   initialize the configuration options', 2);
-      $this->configOptions = array();
-      $this->configurationRead = false;
-      
-      // define the valid configuration options
-      $this->debug('   define the two default valid configuration options', 2);
-      $this->validConfigOptions = array( array( 'shorttag' => 'h',
-                                                'longtag' => 'help',
-                                                'filetag' => '',
-                                                'configkey' => 'help',
-                                                'type' => 'switch',
-                                                'validate' => '',
-                                                'combine' => false ),
-                                         array( 'shorttag' => 'v', 
-                                                'longtag' => '', 
-                                                'filetag' => '', 
-                                                'configkey' => 'verbose', 
-                                                'type' => 'switch', 
-                                                'validate' => '', 
-                                                'combine' => true ),
-                                       );
+    /**
+     * Initialize the class
+     * 
+     * @return     void
+     * @access     public
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      30 November 2013
+     * @since      30 December 2009
+     */
+    public function __construct ()
+    {
+        $this->debug('__construct() called', 1);
+
+        // initialize the configuration options
+        $this->debug('initialize the configuration options', 2);
+        $this->configOptions = array();
+        $this->configurationRead = false;
+
+        // define the valid configuration options
+        $this->debug('define the two default valid configuration options', 2);
+        $this->validConfigOptions = array(
+            array(
+                'shorttag' => 'h',
+                'longtag' => 'help',
+                'filetag' => '',
+                'configkey' => 'help',
+                'type' => 'switch',
+                'validate' => '',
+                'combine' => false,
+            ),
+            array(
+                'shorttag' => 'v', 
+                'longtag' => '', 
+                'filetag' => '', 
+                'configkey' => 'verbose', 
+                'type' => 'switch', 
+                'validate' => '', 
+                'combine' => true,
+            ),
+        );
                                          
-      $this->debug('ShellScript() ended',1);
-      
-    }  // end of function ShellScript
+        $this->debug('__construct() ended', 1);
+    }
     
     
     
