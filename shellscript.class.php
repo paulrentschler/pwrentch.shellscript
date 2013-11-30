@@ -1,18 +1,17 @@
 <?php
 
-/********************************************************************
- * Filename: shellscript.class.php
- *
- * Description: Provides a generic class for creating shell scripts.
- *              Provides commonly needed features for most shell
- *                scripts.
- *              Intended to be extended for individual script needs.
- *
- * PHP Version: 4.x or 5.x
- *
- * Written by: Paul Rentschler
- * Created on: 30 December 2009
- ********************************************************************/
+
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
+
+/**
+ * Class for creating shell scripts
+ * 
+ * PHP version 5
+ * 
+ * @author     Paul Rentschler <paul@rentschler.ws>
+ * @since      30 November 2013
+ * @since      30 December 2009
+ */
 
 
 /********************************************************************
@@ -53,17 +52,96 @@
  ********************************************************************/
 
 
-  class ShellScript {
+/**
+ * The basis for a shell script
+ *
+ * Provides the most commonly needed features for creating shell scripts
+ * and is intended to be extented to create each shell script.
+ * 
+ * @author     Paul Rentschler <paul@rentschler.ws>
+ * @since      30 November 2013
+ * @since      30 December 2009
+ */
+class ShellScript
+{
+    /**
+     * Holds the parsed configuration options from the command line
+     * and/or the config file
+     *
+     * @var        array
+     */
+    protected $configOptions = array();
+
+
+    /**
+     * Indicates if the command line arguments have been read
+     *
+     * @var        boolean
+     */
+    protected $configurationRead = false;
+
+
+    /**
+     * Debug log file name
+     *
+     * Defaults to "debug.log" in the current directory.
+     *
+     * @var        string
+     */
+    protected $debugLogFilename = 'debug.log';
+
+
+    /**
+     * Indicates if debug mode is on or off
+     *
+     * If on, it outputs to self::debugLogFilename
+     *
+     * @var        boolean
+     */
+    protected $debugMode = false;
+
+
+    /**
+     * What array key in self::configOptions indicates the level of
+     * verbosity for debug messages
+     *
+     * @var        string
+     */
+    protected $debugVerboseKey = 'verbose';
+
+
+    /**
+     * Error message generated from any of the internal methods
+     *
+     * @var        string
+     */
+    protected $errorMsg = '';
+
+
+    /**
+     * Type of error message generated from any of the internal methods
+     *
+     * @var        string
+     */
+    protected $errorType = '';
+
+
+    /**
+     * Track the starting and stopping times for the timer methods
+     *
+     * @var        array
+     */
+    protected $scriptTimer = array();
+
+
+    /**
+     * Configuration options that were specified via the command line and/or
+     * the configuration file that have been validated.
+     *
+     * @var        array
+     */
+    protected $validConfigOptions = array();
     
-    var $scriptTimer = array();              // track the default starting and stopping times for the timer methods
-    var $configurationRead = false;          // indicates when the command line arguments have been read
-    var $configOptions = array();            // holds configuration options from the command line and config file
-    var $validConfigOptions = array();       // options that are valid on the command line and in the config file
-    var $errorMsg = '';                      // error message generated from any of the internal methods
-    var $errorType = '';                     // type of error message generated from any of the internal methods
-    var $debugLogFilename = 'debug.log';     // debug log file name to use
-    var $debugMode = false;                  // debug mode on or off. If on, it outputs to $debugLogFilename
-    var $debugVerboseKey = 'verbose';        // what key in $configOptions indicates the level of verbosity for debug messages
     
    
     function ShellScript () {
