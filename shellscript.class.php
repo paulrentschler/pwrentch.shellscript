@@ -115,7 +115,7 @@ class ShellScript
      *
      * @var        string
      */
-    public $description = 'A basic shell script';
+    protected $description = 'A basic shell script';
 
 
     /**
@@ -140,6 +140,15 @@ class ShellScript
      * @var        array
      */
     protected $scriptTimer = array();
+
+
+    /**
+     * Suppress displaying the "this software supplied with no warranty"
+     * message when outputting the syntax
+     *
+     * @var        boolean
+     */
+    protected $suppressWarrantyWarning = false;
 
 
     /**
@@ -1082,9 +1091,11 @@ class ShellScript
             }
         }
 
-        echo "\n";
-        echo 'This software comes with ABSOLUTELY NO WARRANTY. '
-            ."Use at your own risk!\n";
+        if (!$this->suppressWarrantyWarning) {
+            echo "\n";
+            echo 'This software comes with ABSOLUTELY NO WARRANTY. '
+                ."Use at your own risk!\n";
+        }
         echo '----------------------------------------------------------------'
             ."---------------\n";
       
