@@ -761,40 +761,49 @@ class ShellScript
     
     
     
-    function OutputError ($fatal = false, $message = '') {
-      /** PRIVATE
-        *   Outputs the message stored in $this->errorMsg
-        *     to the user.
-        *   $fatal indicates whether or not to stop the
-        *     script from executing. If $fatal is true,
-        *     the message is displayed in bright red.
-        */
-      
-      $this->debug('OutputError('.(($fatal) ? 'true' : 'false').') called', 1);
-      
-      // output the word ERROR: in red or bright red if fatal
-      $this->cecho('ERROR: ', 'red', $fatal);
+    /**
+     * Outputs the self::errorMsg error message to the user
+     *
+     * Script execution is halted if $fatal = true along with the message
+     * being displayed in bright red.
+     * 
+     * @param      boolean $fatal    a boolean indicating if the error should
+     *                               stop script execution
+     * @param      string  $message  a string containing the message to display.
+     *                               If blank, self::errorMsg is used.
+     * @return     void
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      1 December 2013
+     * @since      30 December 2009
+     */
+    protected function outputError ($fatal = false, $message = '')
+    {
+        $this->debug('OutputError('.(($fatal) ? 'true' : 'false').') called', 1);
 
-      // see if we are using a provided message
-      if (!(isset($message) && $message <> '')) {
-        $this->debug('   no message was provided, using $this->errorMsg', 2);
-        $message = $this->errorMsg;
-      }
+        // output the word ERROR: in red or bright red if fatal
+        $this->cecho('ERROR: ', 'red', $fatal);
+
+        // see if we are using a provided message
+        if (!(isset($message) && $message <> '')) {
+            $this->debug('no message was provided, using self::errorMsg', 2);
+            $message = $this->errorMsg;
+        }
       
-      // see if this message is fatal and thus stops the script
-      if ($fatal) {
-        $this->debug('   the message is fatal', 2);
-        die($message."\n");
-        
-      } else {
-        $this->debug('   the message is not fatal', 2);
-        // output the message to the user
-        echo $message."\n";
-      }
+        // see if this message is fatal and thus stops the script
+        if ($fatal) {
+            $this->debug('the message is fatal', 2);
+            $this->debug('OutputError() ended with die()', 1);
+            die($message."\n");
+
+        } else {
+            $this->debug('the message is not fatal', 2);
+            // output the message to the user
+            echo $message."\n";
+        }
       
-      $this->debug('OutputError() ended', 1);
-    
-    }  // end of function OutputError
+        $this->debug('OutputError() ended', 1);
+    }
     
     
     
