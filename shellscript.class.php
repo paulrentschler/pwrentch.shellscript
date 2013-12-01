@@ -5,51 +5,18 @@
 
 /**
  * Class for creating shell scripts
+ *
+ * See the readme.md file for additional documentation and usage instructions.
  * 
  * PHP version 5
  * 
  * @author     Paul Rentschler <paul@rentschler.ws>
+ * @copyright  2009-2013 Paul Allen Rentschler
+ * @license    http://opensource.org/licenses/BSD-3-Clause  BSD license 3-clause
  * @since      30 November 2013
  * @since      30 December 2009
  */
 
-
-/********************************************************************
- * DOCUMENTATION:
- *
- * It is expected that you will use this class as a base class and
- *   extend it to make your own shell script.
- * In doing so, you must replicate the tasks performed in the
- *   constructor or call parent:constructor()
- * 
- * You must define the valid configuration options that can be
- *   specified on the command line, but redefining, or continuing
- *   the $this->validConfigOptions array.
- * 'type' can be either "switch" or "value"
- * 'validate' should be blank or one of the following functions:
- *              ValidateString
- *              ValidateAlphaString
- *              ValidateAlphaNumericString
- *              ValidateEmailAddress
- *              ValidateDate
- *              ValidateWebUrl
- *              ValidateIPAddress
- *              ValidateFilename
- *              ValidatePath
- *              ValidateLocalPath
- *              ValidateMySQLServer
- *              ValidateMySQLDatabase
- *            You can also define and use your own validation
- *              functions or redefine any of these provided.
- *
- * Verbosity levels used for debug entries
- *   All of the methods below allow for debug messages to be output
- *     using the debug method.
- *   level 0 = outputting the errorMsg property when it's set
- *   level 1 = indicating when methods start and stop along with
- *               calling parameters
- *   level 2 = conditionals indicated (if, for, while, switch, etc)
- ********************************************************************/
 
 
 /**
