@@ -702,6 +702,58 @@ class ShellScript
     
     
     /**
+     * Formats time into hours, minutes, seconds, and hundredths of a second
+     * 
+     * @param      float $totalSeconds  a float containing the total number of
+     *                                  seconds to format
+     * @return     string  a string indicating the number of hours, minutes,
+     *                     seconds and hundredths of a second
+     * @access     public
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      1 December 2013
+     * @since      30 December 2009
+     */
+    public function formatTime ($totalSeconds)
+    {
+        $this->debug('formatTime('.$totalSeconds.') called', 1);
+
+        // break down the totalSeconds into whole hours
+        if ($totalSeconds > 3600) {
+            $this->debug('totalSeconds is over an hour', 2);
+            $hours = floor($totalSeconds / 3600);
+            $totalSeconds -= ($hours * 3600);
+            $this->debug('whole hours: '.$hours, 3);
+        }
+      
+        // break down the remaining totalSeconds into whole minutes
+        if ($totalSeconds > 60) {
+            $this->debug('totalSeconds is over a minute', 2);
+            $minutes = floor($totalSeconds / 60);
+            $totalSeconds -= ($minutes * 60);
+            $this->debug('whole minutes: '.$minutes, 3);
+        }
+
+        // piece the hours, minutes, and seconds together
+        $formattedTime = '';
+        if (isset($hours)) {
+            $this->debug('including hours ('.$hours.') in the result', 2);
+            $formattedTime .= $hours.' hours ';
+        }
+        if (isset($minutes)) {
+            $this->debug('including minutes ('.$minutes.') in the result', 2);
+            $formattedTime .= $minutes.' minutes ';
+        }
+        // include the seconds as a 2-place decimal value
+        $formattedTime .= number_format($totalSeconds, 2).' seconds';
+
+        // return the formatted run time in hours, minutes, and seconds
+        $this->debug('formatTime() = '.$formattedTime.' ended', 1);
+        return $formattedTime;
+    }
+
+
+
+    /**
      * Format the syntax for the config option tag (short or long)
      *
      * Used by the self::outputSyntax method for auto-generating the syntax
@@ -756,6 +808,73 @@ class ShellScript
         }
 
         $this->debug('generateSyntaxTag() = '.$result.' ended', 1);
+        return $result;
+    }
+    
+    
+    
+    /**
+     * Gets the number of elapsed seconds for the specified timer
+     * 
+     * Elapsed seconds are measured in microseconds for accuracy and based
+     * on the starting and ending timestamps stored in the $timerProperty array.
+     *
+     * @param      string $timerProperty  a string indicating the class property
+     *                                    that holds the starting and ending
+     *                                    timestamps
+     * @return     float  a float indicating the number of elapsed microseconds
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      1 December 2013
+     * @since      30 December 2009
+     */
+    protected function getElapsedSeconds ($timerProperty = 'scriptTimer')
+    {
+        $this->debug('getElapsedSeconds('.$timerProperty.') called', 1);
+        $elapsedSeconds = 0;
+
+        if (isset($this->{$timerProperty})
+            && is_array($this->{$timerProperty})
+        ) {
+            $this->debug('timerProperty ('.$timerProperty
+                .') exists and is an array', 2);
+            if (isset($this->{$timerProperty}['start'])
+                && is_numeric($this->{$timerProperty}['start'])
+                && $this->{$timerProperty}['start'] > 0 
+                && isset($this->{$timerProperty}['end'])
+                && is_numeric($this->{$timerProperty}['end'])
+                && $this->{$timerProperty}['end'] > 0
+            ) {
+                $elapsedSeconds = $this->{$timerProperty}['end'];
+                $elapsedSeconds -= $this->{$timerProperty}['start'];
+                $this->debug('starting and ending times are present and '
+                    .'non-zero, elapsed seconds computed', 2);
+            }
+        }
+
+        $this->debug('getElapsedSeconds() = '.$elapsedSeconds.' ended', 1);
+        return $elapsedSeconds;
+    }
+      
+    
+    
+    /**
+     * Gets the current timestamp including microseconds
+     * 
+     * @return     float  a float indicating the current timestamp in microseconds
+     * @access     private
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      1 December 2013
+     * @since      30 December 2009
+     */
+    private function getMicrotime ()
+    {
+        $this->debug('getMicrotime() called', 1);
+
+        list($usec, $sec) = explode(' ', microtime());
+        $result = ((float)$usec + (float)$sec);
+
+        $this->debug('getMicrotime() = '.$result.' ended', 1);
         return $result;
     }
     
@@ -1010,148 +1129,59 @@ class ShellScript
     
     
     
-    function GetMicrotime () {
-      /** PRIVATE
-        *   Gets the time in microseconds and returns it to
-        *     the calling function so that the time this
-        *     script takes to run can be calculated.
-        */
-      
-      $this->debug('GetMicrotime() called', 1);
+    /**
+     * Starts the specified timer by storing the timestamp with microseconds
+     * 
+     * @param      string $timerProperty  a string indicating the class property
+     *                                    that holds the starting and ending
+     *                                    timestamps
+     * @return     void
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      1 December 2013
+     * @since      30 December 2009
+     */
+    protected function startTimer ($timerProperty = 'scriptTimer')
+    {
+        $this->debug('startTimer('.$timerProperty.') called', 1);
 
-      list($usec, $sec) = explode(" ",microtime());
-      $result = ((float)$usec + (float)$sec);
-      
-      $this->debug('GetMicrotime() = '.$result.' ended', 1);
-      return $result;
+        $this->{$timerProperty} = array(
+            'start' => $this->getMicrotime(),
+            'end' => 0,
+        );
 
-    }  // end of function GetMicrotime
+        $this->debug('startTimer() ended', 1);
+    }
     
     
     
-    function StartTimer ($timerProperty = 'scriptTimer') {
-      /** PRIVATE
-        *   Stores the current timestamp with microseconds as 
-        *     a starting time.
-        *   $timerProperty allows for the class property
-        *     that will hold the starting and ending times
-        *     to be provided. By default it uses 
-        *     $this->scriptTimer to track the total time the
-        *     script has been run.
-        */
-      
-      $this->debug('StartTimer('.$timerProperty.') called', 1);
-      
-      $this->{$timerProperty} = array( 'start' => 0, 'end' => 0 );
-      $this->{$timerProperty}['start'] = $this->GetMicrotime();
-      
-      $this->debug('StartTimer() ended', 1);
-    
-    }  // end of function StartTimer
-    
-    
-    
-    function StopTimer ($timerProperty = 'scriptTimer') {
-      /** PRIVATE
-        *   Stores the current timestamp with microseconds as 
-        *     a ending time.
-        *   $timerProperty allows for the class property
-        *     that will hold the starting and ending times
-        *     to be provided. By default it uses 
-        *     $this->scriptTimer to track the total time the
-        *     script has been run.
-        */
+    /**
+     * Stops the specified timer by storing the timestamp with microseconds
+     * 
+     * @param      string $timerProperty  a string indicating the class property
+     *                                    that holds the starting and ending
+     *                                    timestamps
+     * @return     void
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      1 December 2013
+     * @since      30 December 2009
+     */
+    protected function stopTimer ($timerProperty = 'scriptTimer')
+    {
+        $this->debug('stopTimer('.$timerProperty.') called', 1);
 
-      $this->debug('StopTimer('.$timerProperty.') called', 1);
-      
-      if (isset($this->{$timerProperty}) && is_array($this->{$timerProperty})) {
-        $this->{$timerProperty}['end'] = $this->GetMicrotime();
-      }
-      
-      $this->debug('StopTimer() ended', 1);
-      
-    }  // end of function StopTimer
-    
-    
-    
-    function GetTimerSeconds ($timerProperty = 'scriptTimer') {
-      /** PRIVATE
-        *   Gets the elapsed number of microseconds based on
-        *     starting and ending timestamps
-        *   $timerProperty allows for the class property
-        *     that will hold the starting and ending times
-        *     to be provided. By default it uses 
-        *     $this->scriptTimer to track the total time the
-        *     script has been run.
-        */
-
-      $this->debug('GetTimerSeconds('.$timerProperty.') called', 1);
-      $elapsedSeconds = 0;
-      
-      if (isset($this->{$timerProperty}) && is_array($this->{$timerProperty})) {
-        $this->debug('   timerProperty ('.$timerProperty.') exists and is an array', 2);
-        if (isset($this->{$timerProperty}['start']) && is_numeric($this->{$timerProperty}['start']) &&
-            isset($this->{$timerProperty}['end']) && is_numeric($this->{$timerProperty}['end']) &&
-            $this->{$timerProperty}['start'] > 0 && $this->{$timerProperty}['end'] > 0) {
-          $elapsedSeconds = $this->{$timerProperty}['end'] - $this->{$timerProperty}['start'];
-          $this->debug('   starting and ending times are present and non-zero, elapsed seconds computed', 2);
+        if (isset($this->{$timerProperty})
+            && is_array($this->{$timerProperty})
+        ) {
+            $this->{$timerProperty}['end'] = $this->getMicrotime();
         }
-      }
-      
-      $this->debug('GetTimerSeconds() = '.$elapsedSeconds.' ended', 1);
-      return $elapsedSeconds;
-      
-    }  // end of function GetTimerSeconds
-      
+
+        $this->debug('stopTimer() ended', 1);
+    }
     
     
-    function FormatRuntime ($runSeconds) {
-      /** PRIVATE
-         *   Formats the runtime specified ($runSeconds)
-         *     in seconds into a string that includes
-         *     hours, minutes, seconds, and hundredths
-         *     of a second and returns it to the calling
-         *     function.
-         */
-      
-      $this->debug('FormatRuntime('.$runSeconds.') called', 1);
-      
-      // break down the runSeconds into the number of whole hours
-      if ($runSeconds > 3600) {
-        $this->debug('   runSeconds is over an hour', 2);
-        $hours = floor($runSeconds / 3600);
-        $runSeconds -= ($hours * 3600);
-      }
-      
-      // take the remaining runSeconds and break it down into the
-      //  number of whole minutes
-      if ($runSeconds > 60) {
-        $this->debug('   runSeconds is over a minute', 2);
-        $minutes = floor($runSeconds / 60);
-        $runSeconds -= ($minutes * 60);
-      }
-
-      // piece the hours, minutes, and seconds together
-      $runtime = '';
-      if (isset($hours)) {
-        $this->debug('   hours ('.$hours.') is defined', 2);
-        $runtime .= $hours.' hours ';
-      }
-      if (isset($minutes)) {
-        $this->debug('   minutes ('.$minutes.') is defined', 2);
-        $runtime .= $minutes.' minutes ';
-      }
-      // include the seconds as a 2-place decimal value
-      $runtime .= number_format($runSeconds, 2).' seconds';
-
-      // return the formatted run time in hours, minutes, and seconds
-      $this->debug('FormatRuntime() = '.$runtime.' ended', 1);
-      return $runtime;
-
-    }  // end of FormatRuntime
-
-
-
+    
     /**
      * Word wraps text to a maximum length
      * 
