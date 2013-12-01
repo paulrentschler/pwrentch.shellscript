@@ -881,6 +881,42 @@ class ShellScript
     
     
     /**
+     * Prompt the user to enter input and return it
+     * 
+     * @param      string  $prompt  a string containing the prompt to display
+     * @param      integer $length  an integer indicating the maximum length
+     *                              of the user's input
+     * @return     string  a string containing the value entered by the user
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      1 December 2013
+     * @since      30 December 2009
+     */
+    protected function getUserInput ($prompt = '', $length = 255)
+    {
+        $this->debug('getUserInput('.$prompt.', '.$length.') called', 1);
+
+        // prompt the user, if specified
+        if (isset($prompt) && $prompt <> '') {
+            $this->debug('outputting the provided user prompt', 2);
+            echo $prompt;
+        }
+      
+        // collect the user's response
+        $this->debug('collecting the user\'s response', 2);
+        $STREAM = fopen("php://stdin", "r");
+        $input = fgets($STREAM, $length);
+        $input = trim($input);
+        fclose($STREAM);
+      
+        // return the response
+        $this->debug('getUserInput() = '.$input.' ended', 1);
+        return $input;
+    }
+    
+    
+    
+    /**
      * Outputs the self::errorMsg error message to the user
      *
      * Script execution is halted if $fatal = true along with the message
@@ -1095,40 +1131,6 @@ class ShellScript
 
 
 
-    function GetUserInput ($prompt = '', $length = 255) {
-      /** PRIVATE
-         *   Prompts the user to enter some type of input and 
-         *     then returns the entered value to the calling
-         *     function
-         *   $msgQuery parameter allows the calling function
-         *     to specify the question to be asked
-         *   $length parameter allows the calling function to
-         *     specify a maximum length that the user can enter
-         */
-      
-      $this->debug('GetUserInput('.$prompt.', '.$length.') called', 1);
-      
-      // prompt the user with the provided question
-      if (isset($prompt) && $prompt <> '') {
-        $this->debug('   outputting the provided user prompt', 2);
-        echo $prompt;
-      }
-      
-      // collect the user's response
-      $this->debug('   collecting the user\'s response', 2);
-      $STREAM = fopen("php://stdin", "r");
-      $input = fgets($STREAM, $length);
-      $input = trim($input);
-      fclose($STREAM);
-      
-      // return the response
-      $this->debug('GetUserInput() = '.$input.' ended', 1);
-      return $input;
-      
-    }  // end of function GetUserInput
-    
-    
-    
     /**
      * Starts the specified timer by storing the timestamp with microseconds
      * 
