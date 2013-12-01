@@ -526,7 +526,7 @@ class ShellScript
      * @since      1 December 2013
      * @since      30 December 2009
      */
-    function cecho ($text, $forecolor = 'default', $bright = false,
+    public function cecho ($text, $forecolor = 'default', $bright = false,
         $backcolor = 'default', $reset = true
     ) {
         $this->debug('cecho('.$message.', '.$forecolor.', '
