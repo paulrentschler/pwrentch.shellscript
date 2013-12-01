@@ -465,48 +465,6 @@ class ShellScript
     
     
     
-    function StoreConfigOption ($configKey, $value, $optionsProperty = 'configOptions') {
-      /** PRIVATE
-        *   Stores the $configKey = $value combination in the
-        *     $this->{$optionsProperty} array.
-        *   If a value exists and it matches $value, nothing is changed
-        *   If a value exists and does not match $value, then the
-        *     value for the $configKey entry is converted to an
-        *     array that holds the old value and $value
-        */
-            
-      $this->debug('StoreConfigOption('.$configKey.', '.$value.', '.$optionsProperty.') called', 1);
-      
-      if (array_key_exists($configKey, $this->{$optionsProperty})) {
-        $this->debug('   configKey ('.$configKey.') exists in configOptions', 2);
-        // it exists, do the current and new values match?
-        if ($this->{$optionsProperty}[$configKey] <> $value) {
-          $this->debug('   there is an existing value that does not match this one', 2);
-          // no. if it's not an array, make it one
-          if (!is_array($this->{$optionsProperty}[$configKey])) {
-            $this->debug('   this option is not an array, making it one', 2);
-            $tmpValue = $this->{$optionsProperty}[$configKey];
-            $this->{$optionsProperty}[$configKey] = array();
-            $this->{$optionsProperty}[$configKey][] = $tmpValue;
-            unset($tmpValue);
-          }
-          
-          // store the value in the array
-          $this->debug('   storing the value in configOptions['.$configKey.'][]', 2);
-          $this->{$optionsProperty}[$configKey][] = $value;
-        }
-      } else {
-        // store the value
-        $this->debug('   storing the value in configOptions['.$configKey.']', 2);
-        $this->{$optionsProperty}[$configKey] = $value;
-      }
-      
-      $this->debug('StoreConfigOption() ended', 1);
-      
-    }  // end of function StoreConfigOption
-          
-    
-
     /**
      * Echoes text to the screen with optional ANSI color coding
      *
@@ -1198,6 +1156,66 @@ class ShellScript
     
     
     
+    /**
+     * Stores a value in the config options array
+     * 
+     * If the options array has an existing value that matches $value, nothing
+     * is changed.
+     *
+     * If the options array has an existing value that does not match $value,
+     * the value is converted to an array and both the old and new $value are
+     * stored.
+     *
+     * @param      string $configKey        a string indicating the array
+     *                                      index to store $value in
+     * @param      string $value            a string containing the value
+     * @param      string $optionsProperty  a string indicating which class
+     *                                      property holds the config options
+     * @return     void
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      1 December 2013
+     * @since      30 December 2009
+     */
+    protected function storeConfigOption ($configKey, $value,
+        $optionsProperty = 'configOptions'
+    ) {
+        $this->debug('storeConfigOption('.$configKey.', '.$value.', '
+            .$optionsProperty.') called', 1);
+      
+        if (array_key_exists($configKey, $this->{$optionsProperty})) {
+            $this->debug('configKey ('.$configKey.') exists', 2);
+            // it exists, do the current and new values match?
+            if ($this->{$optionsProperty}[$configKey] <> $value) {
+                $this->debug('there is an existing value that does not '
+                    .'match this one', 2);
+
+                // no. if it's not an array, make it one
+                if (!is_array($this->{$optionsProperty}[$configKey])) {
+                    $this->debug('option is not an array, making it one', 2);
+                    $origValue = $this->{$optionsProperty}[$configKey];
+                    $this->{$optionsProperty}[$configKey] = array();
+                    $this->{$optionsProperty}[$configKey][] = $origValue;
+                    unset($origValue);
+                }
+
+                // store the value in the array
+                $this->debug('storing the value in '.$optionsProperty
+                    .'['.$configKey.'][]', 2);
+                $this->{$optionsProperty}[$configKey][] = $value;
+            }
+        } else {
+            // store the value
+            $this->debug('storing the value in '.$optionsProperty
+                .'['.$configKey.']', 2);
+            $this->{$optionsProperty}[$configKey] = $value;
+        }
+      
+        $this->debug('storeConfigOption() ended', 1);
+    }
+          
+    
+
     /**
      * Word wraps text to a maximum length
      * 
