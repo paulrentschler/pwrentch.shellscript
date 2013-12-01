@@ -498,98 +498,121 @@ class ShellScript
           
     
 
-    function cecho ($message, $forecolor = 'default', $bright = false, $backcolor = 'default', $reset = true) {
-      /** PRIVATE
-        *   Outputs the provided $message using the echo command
-        *     but allows for ANSI color codes to be output as well
-        *     to control the color of the text and background.
-        *   The text and background color is always reset to the 
-        *     default color after output unless $reset = false
-        */
+    /**
+     * Echoes text to the screen with optional ANSI color coding
+     *
+     * Text and background colors are always reset to defaults unless
+     * $reset = false.
+     * 
+     * @param      string  $text       a string containing the text to output
+     * @param      string  $forecolor  a string indicating the foreground color
+     * @param      boolean $bright     a boolean indicating if the foreground
+     *                                 color should be the bright version
+     * @param      string  $backcolor  a string indicating the background color
+     * @param      boolean $reset      a boolean indicating if the colors
+     *                                 should be reset to their defaults
+     * @return     void
+     * @access     public
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      1 December 2013
+     * @since      30 December 2009
+     */
+    function cecho ($text, $forecolor = 'default', $bright = false,
+        $backcolor = 'default', $reset = true
+    ) {
+        $this->debug('cecho('.$message.', '.$forecolor.', '
+            .(($bright) ? 'true' : 'false').', '.$backcolor.', '
+            .(($reset) ? 'true' : 'false').') called', 1);
       
-      $this->debug('cecho('.$message.', '.$forecolor.', '.(($bright) ? 'true' : 'false').', '.$backcolor.', '.(($reset) ? 'true' : 'false').') called', 1);
+        // define the default value
+        $default = "\033[0m";
       
-      // define the default value
-      $default = "\033[0m";
+        // define the color codes
+        $colorCodes = array(
+            'black' => 0,
+            'red' => 1,
+            'green' => 2,
+            'yellow' => 3,
+            'blue' => 4,
+            'magenta' => 5,
+            'cyan' => 6,
+            'white' => 7,
+        );
       
-      // define the color codes
-      $colorCodes = array( 'black' => 0,
-                           'red' => 1,
-                           'green' => 2,
-                           'yellow' => 3,
-                           'blue' => 4,
-                           'magenta' => 5,
-                           'cyan' => 6,
-                           'white' => 7 );
       
-      
-      // if the default foreground and background are used, just display the text
-      if ($forecolor == 'default' && $backcolor == 'default') {
-        $this->debug('   foreground and background colors are default', 2);
-        echo $default;
-        if ($message <> '') {
-          $this->debug('   outputing the message', 2);
-          echo $message;
-        }
-        
-      } else {
-        /* DETERMINE THE COLOR CODES */
-        
-        // default codes
-        $foreCode = '';
-        $backCode = '';
-      
-        // look up the provided colors to get the codes
-        $forecolor = strtolower($forecolor);
-        $backcolor = strtolower($backcolor);
-        if (isset($forecolor) && array_key_exists($forecolor, $colorCodes)) {
-          $foreCode = 30 + ((int) $colorCodes[$forecolor]);
-          $this->debug('   setting the foreground code to: '.$foreCode, 2);
-        }
-        if (isset($backcolor) && array_key_exists($backcolor, $colorCodes)) {
-          $backCode = 40 + ((int) $colorCodes[$backcolor]);
-          $this->debug('   setting the background code to: '.$backCode, 2);
-        }
-        
-        
-        /* OUTPUT THE COLORED MESSAGE */
-        // the color code
-        $this->debug('   building the escape sequence', 2);
-        $escapeSeq = "\033[";
-        $escapeSeq .= (($bright) ? '1' : '0');
-        $escapeSeq .= (($foreCode <> '') ? ';'.$foreCode : '');
-        $escapeSeq .= (($backCode <> '') ? ';'.$backCode : '');
-        $escapeSeq .= 'm';
-        echo $escapeSeq;
-        
-        // the message
-        $msgLength = strlen($message);
-        if ($msgLength > 0 && strrpos($message, "\n") == $msgLength - 1 && $backCode <> '' && $reset) {
-          $this->debug('   the message ended with a carriage return and the background color is not the default', 2);
-          if ($msgLength >= 2) {
-            $this->debug('   outputting the message, resetting the color, then outputing the carriage return', 2);
-            echo substr($message, 0, $msgLength - 2);
+        // if the default foreground and background are used, just display the text
+        if ($forecolor == 'default' && $backcolor == 'default') {
+            $this->debug('foreground and background colors are default', 2);
             echo $default;
-            echo "\n";
-          }
+            if ($message <> '') {
+                $this->debug('outputting the message', 2);
+                echo $message;
+            }
+
         } else {
-          $this->debug('   the message has no carriage return or the background color is the default', 2);
-          if ($message <> '') {
-            $this->debug('   outputting the message', 2);
-            echo $message;
-          }
-          
-          // reset the colors
-          if ($reset) {
-            $this->debug('   resetting the colors to the default', 2);
-            echo $default;
-          }
+            /* DETERMINE THE COLOR CODES */
+
+            // default codes (white on black)
+            $foreCode = 37;
+            $backCode = 40;
+
+            // look up the provided colors to get the codes
+            $forecolor = strtolower($forecolor);
+            $backcolor = strtolower($backcolor);
+            if (isset($forecolor) && array_key_exists($forecolor, $colorCodes)) {
+                $foreCode = 30 + ((int) $colorCodes[$forecolor]);
+                $this->debug('setting the foreground code to: '.$foreCode, 2);
+            }
+            if (isset($backcolor) && array_key_exists($backcolor, $colorCodes)) {
+                $backCode = 40 + ((int) $colorCodes[$backcolor]);
+                $this->debug('setting the background code to: '.$backCode, 2);
+            }
+        
+        
+            /* OUTPUT THE COLORED MESSAGE */
+            // the color code
+            $this->debug('building the escape sequence', 2);
+            $escapeSeq = "\033[";
+            $escapeSeq .= (($bright) ? '1' : '0');
+            $escapeSeq .= (($foreCode <> '') ? ';'.$foreCode : '');
+            $escapeSeq .= (($backCode <> '') ? ';'.$backCode : '');
+            $escapeSeq .= 'm';
+            echo $escapeSeq;
+        
+            // the message
+            $msgLength = strlen($message);
+            if ($msgLength > 0
+                && strrpos($message, "\n") == $msgLength - 1
+                && $backCode <> ''
+                && $reset
+            ) {
+                $this->debug('the message ended with a carriage return and '
+                    .'the background color is not the default', 2);
+                if ($msgLength >= 2) {
+                    $this->debug('outputting the message, resetting the color, '
+                        .'then outputing the carriage return', 2);
+                    echo substr($message, 0, $msgLength - 2);
+                    echo $default;
+                    echo "\n";
+                }
+            } else {
+                $this->debug('the message has no carriage return or the '
+                    .'background color is the default', 2);
+                if ($message <> '') {
+                    $this->debug('outputting the message', 2);
+                    echo $message;
+                }
+
+                // reset the colors
+                if ($reset) {
+                    $this->debug('resetting the colors to the default', 2);
+                    echo $default;
+                }
+            }
         }
-      }
       
-      $this->debug('cecho() ended', 1);
-      
-    }  // end of function cecho
+        $this->debug('cecho() ended', 1);
+    }
     
     
     
