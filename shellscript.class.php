@@ -212,259 +212,6 @@ class ShellScript
     
     
     
-    function ProcessCommandLine () {
-      /** PRIVATE
-        *   Reads any parameters that were passed to the script
-        *     when it was called from the command line. It validates
-        *     them against validConfigOptions array and stores the
-        *     valid ones in configOptions array.
-        *   Sets configurationRead to true when finished.
-        */
-      
-      $this->debug('ProcessCommandLine() called', 1);
-      
-      // make sure some parameters were passed
-      if ($_SERVER['argc'] > 1) {
-        $this->debug('   parameters passed on the command line: '.$_SERVER['argc'], 2);
-        
-        // create arrays indexed on short and long tags
-        $this->debug('   create arrays indexed on short and long tags', 2);
-        $validShortTags = array();
-        $validLongTags = array();
-        foreach ($this->validConfigOptions as $key => $data) {
-          if (isset($data['shorttag']) && $data['shorttag'] <> '') {
-            $validShortTags[$data['shorttag']] = $data;
-          }
-          if (isset($data['longtag']) && $data['longtag'] <> '') {
-            $validLongTags[$data['longtag']] = $data;
-          }
-        }
-        
-        // process the command line arguments
-        $this->debug('   for loop to process all the command line arguments', 2);
-        for ($i = 1; $i < $_SERVER['argc']; $i++) {
-          $arg = $_SERVER['argv'][$i];
-          $tag = '';
-          $tagData = array();
-          $value = '';
-          if (substr($arg, 0, 2) == '--') {
-            $this->debug('   argument ('.$arg.') is a long tag argument', 2);
-            // we got a long tag
-            if (strpos($arg, '=') !== false) {
-              list($tag, $value) = explode('=', substr($arg, 2));
-            } elseif (strpos($arg, ':') !== false) {
-              list($tag, $value) = explode(':', substr($arg, 2));
-            } else {
-              $tag = substr($arg, 2);
-            }
-            
-            if (array_key_exists($tag, $validLongTags)) {
-              $this->debug('   argument('.$arg.') is a valid option', 2);
-              // grab the data
-              $tagData = $validLongTags[$tag];
-            }
-          
-          } elseif (substr($arg, 0, 1) == '-') {
-            $this->debug('   argument ('.$arg.') is a short tag argument', 2);
-            // we got a short tag
-            if (strpos($arg, '=') !== false) {
-              list($tag, $value) = explode('=', substr($arg, 1));
-            } elseif (strpos($arg, ':') !== false) {
-              list($tag, $value) = explode(':', substr($arg, 1));
-            } else {
-              $tag = substr($arg, 1);
-            }
-            
-            if (array_key_exists($tag, $validShortTags)) {
-              $this->debug('   argument('.$arg.') is a valid option', 2);
-              // grab the data
-              $tagData = $validShortTags[$tag];
-            }
-          }
-          
-          // process the tag if it exists
-          if ($tag <> '' && is_array($tagData) && count($tagData) > 0) {
-            $this->debug('   processing tag ('.$tag.')', 2);
-            
-            switch (strtolower($tagData['type'])) {
-              case 'switch':
-                $this->debug('   tag ('.$tag.') is a switch type', 2);
-                // see if the switch has already been stored
-                if (array_key_exists($tagData['configkey'], $this->configOptions)) {
-                  $this->debug('   tag ('.$tag.') already exists in configOptions', 2);
-                  // it does, so can multiple tags be combined
-                  if ($tagData['combine']) {
-                    $this->debug('   tag ('.$tag.') is combinable, incrementing the value', 2);
-                    // yes, so increment the value
-                    $this->configOptions[$tagData['configkey']]++;
-                  }
-                } else {
-                  $this->debug('   tag ('.$tag.') does not exist in configOptions, adding it', 2);
-                  // store the config option
-                  $this->configOptions[$tagData['configkey']] = 1;
-                }
-                break;
-                
-              case 'value':
-                $this->debug('   tag ('.$tag.') is a value type', 2);
-                $validValue = '';
-                
-                // if we don't already have a value, we need to see if the next argument is the value
-                if ($value == '') {
-                  $this->debug('   we do not have a value already, checking the next argument', 2);
-                  if (substr($_SERVER['argv'][$i + 1], 0, 1) <> '-') {
-                    $this->debug('   the next argument was a value', 2);
-                    // the next argument is the value
-                    $value = $_SERVER['argv'][$i + 1];
-                    $i++;
-                  }
-                }
-                
-                // validate the value if a validator is provided
-                if ($value <> '' && isset($tagData['validate']) && $tagData['validate'] <> '') {
-                  // if the validation method exists, call it
-                  $validateMethod = $tagData['validate'];
-                  $this->debug('   validating the value. validate method: '.$validateMethod, 2);
-                  if (method_exists($this, $validateMethod)) {
-                    $this->debug('   validate method exists', 2);
-                    if ($this->$validateMethod($value)) {
-                      $this->debug('   the value was valid', 2);
-                      // the value is valid
-                      $validValue = $value;
-                    }
-                  }
-                }
-                
-                // store the value, if a value exists, make it an array of values
-                if ($validValue <> '') {
-                  $this->debug('   we have a valid value, store it', 2);
-                  $this->StoreConfigOption($tagData['configkey'], $validValue);
-                }
-                break;
-            }
-          }
-        }
-      }
-      
-      // indicate that we have read/processed the command line
-      $this->debug('   indicate the command line arguments have been processed', 2);
-      $this->configurationRead = true;
-      
-      $this->debug('ProcessCommandLine() ended', 1);
-      
-    }  // end of function ProcessCommandLine
-      
-    
-    
-    function ProcessConfigFile ($filename, $optionsProperty = 'configOptions') {
-      /** PRIVATE
-        *   Reads the configuration file specified by $filename.
-        *   Configuration options are validated based on the information
-        *     in the $this->validConfigOptions array and the valid
-        *     values are stored in $this->configOptions array.
-        *   $optionsProperty allows you to specify a different
-        *     class property to store the valid options in instead
-        *     of using the $this->configOptions array.
-        */
-
-      $this->debug('ProcessConfigFile('.$filename.', '.$optionsProperty.') called', 1);
-      
-      // assume the file is read and processed successfully
-      $result = true;
-      
-      // make sure the configuration file exists
-      if (!file_exists($filename)) {
-        $this->errorMsg = 'The configuration file you specified ('.$filename.') does not exist.';
-        $this->errorType = 'error';
-        $this->debug();
-        $result = false;
-        
-      } else {
-        $this->debug('   filename ('.$filename.') exists, open it for reading', 2);
-        // open the config file for reading
-        if (!($configFile = fopen($filename, 'r'))) {
-          $this->errorMsg = 'The configuration file ('.$filename.') could not be '.
-                            'opened for reading. Please check your permissions.';
-          $this->errorType = 'error';
-          $this->debug();
-          $result = false;
-          
-        } else {
-          $this->debug('   config file has been opened for reading', 2);
-          // build an array of config options indexed by the file tag
-          $validFileTags = array();
-          foreach ($this->validConfigOptions as $key => $data) {
-            if (isset($data['filetag']) && $data['filetag'] <> '') {
-              $validFileTags[strtolower($data['filetag'])] = $data;
-            }
-          }
-          
-          // read and process the config file
-          $this->debug('   while loop to read through the config file', 2);
-          while (!feof($configFile)) {
-            // get a line from the file
-            $line = trim(fgets($configFile));
-            
-            // ignore blank lines and lines that start with a hash (#)
-            if ($line <> '' && substr($line, 0, 1) <> '#') {
-              $this->debug('   line is not blank and not a comment', 2);
-              // it's a valid line, look for a equals
-              if (strpos($line, '=') !== false) {
-                $this->debug('   line contained an equals sign', 2);
-                // split the line into a tag and a value
-                list($tag, $value) = explode('=', $line, 2);
-                $tag = trim(strtolower($tag));
-                $tagData = array();
-                $value = trim($value);
-                
-                
-                // validate the tag
-                if (array_key_exists($tag, $validFileTags)) {
-                  $this->debug('   tag ('.$tag.') was valid', 2);
-                  $tagData = $validFileTags[$tag];
-                  $validValue = '';
-                  
-                  // check to see if this option is a value type
-                  if ($tagData['type'] == 'value') {
-                    $this->debug('   tag ('.$tag.') is a value type', 2);
-                    // validate the value if a validator is specified
-                    if ($value <> '' && isset($tagData['validate']) && $tagData['validate'] <> '') {
-                      // if the validation method exists, call it
-                      $validateMethod = $tagData['validate'];
-                      $this->debug('   validating the value. validate method: '.$validateMethod, 2);
-                      if (method_exists($this, $validateMethod)) {
-                        $this->debug('   validate method exists', 2);
-                        if ($this->$validateMethod($value)) {
-                          $this->debug('   the value was valid', 2);
-                          // the value is valid
-                          $validValue = $value;
-                        }
-                      }
-                    }
-                    
-                    // store the value, if a value exists, make it an array of values
-                    if ($validValue <> '') {
-                      $this->debug('   we have a valid value, store it', 2);
-                      $this->StoreConfigOption($tagData['configkey'], $validValue, $optionsProperty);
-                    }
-                  }
-                }                  
-              }
-            }
-          }
-          
-          // close the config file
-          $this->debug('   close the config file', 2);
-          fclose($configFile);
-        }
-      }
-      
-      $this->debug('ProcessConfigFile() ended', 1);
-      
-    }  // end of function ProcessConfigFile
-    
-    
-    
     /**
      * Echoes text to the screen with optional ANSI color coding
      *
@@ -1103,6 +850,290 @@ class ShellScript
 
 
 
+    /**
+     * Reads command line parameters, validates them, and stores them
+     * 
+     * Parameters are validated against self::validConfigOptions and stored
+     * in self::configOptions.
+     *
+     * self::configurationRead is set to true when finished.
+     *
+     * @return     void
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      1 December 2013
+     * @since      30 December 2009
+     */
+    function processCommandLine ()
+    {
+        $this->debug('processCommandLine() called', 1);
+      
+        $this->debug('parameters passed on the command line: '
+            .$_SERVER['argc'], 2);
+
+        // make sure some parameters were passed
+        if ($_SERVER['argc'] > 1) {
+            // create arrays indexed on short and long tags
+            $this->debug('create arrays indexed on short and long tags', 2);
+            $validShortTags = array();
+            $validLongTags = array();
+            foreach ($this->validConfigOptions as $key => $data) {
+                if (isset($data['shorttag']) && $data['shorttag'] <> '') {
+                    $validShortTags[$data['shorttag']] = $data;
+                    $this->debug('valid short tag: '.$data['shorttag'], 3);
+                }
+                if (isset($data['longtag']) && $data['longtag'] <> '') {
+                    $validLongTags[$data['longtag']] = $data;
+                    $this->debug('valid long tag: '.$data['longtag'], 3);
+                }
+            }
+        
+            // process the command line arguments
+            $this->debug('for loop to process the command line arguments', 2);
+            for ($i = 1; $i < $_SERVER['argc']; $i++) {
+                $arg = $_SERVER['argv'][$i];
+                $tag = '';
+                $tagData = array();
+                $value = '';
+                if (substr($arg, 0, 2) == '--') {
+                    $this->debug('long tag ('.$arg.') detected', 2);
+                    // long tag detected
+                    if (strpos($arg, '=') !== false) {
+                        list($tag, $value) = explode('=', substr($arg, 2));
+                    } elseif (strpos($arg, ':') !== false) {
+                        list($tag, $value) = explode(':', substr($arg, 2));
+                    } else {
+                        $tag = substr($arg, 2);
+                    }
+
+                    if (array_key_exists($tag, $validLongTags)) {
+                        $this->debug('argument ('.$arg.') is a valid option', 2);
+                        // grab the option data
+                        $tagData = $validLongTags[$tag];
+                    }
+
+                } elseif (substr($arg, 0, 1) == '-') {
+                    $this->debug('short tag ('.$arg.') detected', 2);
+                    // short tag detected
+                    if (strpos($arg, '=') !== false) {
+                        list($tag, $value) = explode('=', substr($arg, 1));
+                    } elseif (strpos($arg, ':') !== false) {
+                        list($tag, $value) = explode(':', substr($arg, 1));
+                    } else {
+                        $tag = substr($arg, 1);
+                    }
+
+                    if (array_key_exists($tag, $validShortTags)) {
+                        $this->debug('argument ('.$arg.') is a valid option', 2);
+                        // grab the option data
+                        $tagData = $validShortTags[$tag];
+                    }
+                }
+          
+                // process the tag if it exists
+                if ($tag <> '' && is_array($tagData) && count($tagData) > 0) {
+                    $this->debug('processing tag ('.$tag.')', 2);
+            
+                    $configKey = $tagData['configkey'];
+                    switch (strtolower($tagData['type']))
+                    {
+                        case 'switch':
+                            $this->debug('tag ('.$tag.') is a switch', 2);
+                            // see if the switch has already been stored
+                            if (array_key_exists(
+                                $configKey,
+                                $this->configOptions
+                            )) {
+                                $this->debug('tag ('.$tag.') already exists '
+                                    .'in configOptions', 2);
+                                // combine multiple tags, if possible
+                                if ($tagData['combine']) {
+                                    $this->debug('tag ('.$tag.') is '
+                                        .'combinable, incrementing the '
+                                        .'value', 2);
+                                    // increment the value
+                                    $this->configOptions[$configKey]++;
+                                }
+                            } else {
+                                $this->debug('tag ('.$tag.') does not exist '
+                                    .'in configOptions, adding it', 2);
+                                // store the config option
+                                $this->configOptions[$configKey] = 1;
+                            }
+                            break;
+                
+                        case 'value':
+                            $this->debug('tag ('.$tag.') is a value type', 2);
+                            $validValue = '';
+
+                            // if we don't already have a value, see if the
+                            // next argument is the value
+                            if ($value == '') {
+                                $this->debug('do not have a value already, '
+                                    .'checking the next argument', 2);
+                                if (substr($_SERVER['argv'][$i + 1], 0, 1) <> '-') {
+                                    $this->debug(
+                                        'next argument is the value',
+                                        2
+                                    );
+                                    // the next argument is the value
+                                    $value = $_SERVER['argv'][$i + 1];
+                                    $i++;
+                                }
+                            }
+
+                            // validate the value if a validator is provided
+                            if ($value <> ''
+                                && isset($tagData['validate'])
+                                && $tagData['validate'] <> ''
+                            ) {
+                                // if the validation method exists, call it
+                                $validateMethod = $tagData['validate'];
+                                $this->debug('validating the value. '
+                                    .'validate method: '.$validateMethod, 2);
+                                if (method_exists($this, $validateMethod)) {
+                                    $this->debug('validate method exists', 2);
+                                    if ($this->$validateMethod($value)) {
+                                        $this->debug('the value was valid', 2);
+                                        // the value is valid
+                                        $validValue = $value;
+                                    }
+                                }
+                            }
+
+                            // store the value
+                            // if a value exists, make it an array of values
+                            if ($validValue <> '') {
+                                $this->debug('storing the valid value', 2);
+                                $this->storeConfigOption(
+                                    $tagData['configkey'],
+                                    $validValue
+                                );
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+      
+        // indicate that we have read/processed the command line
+        $this->debug('all command line arguments processed', 2);
+        $this->configurationRead = true;
+
+        $this->debug('processCommandLine() ended', 1);
+    }
+      
+    
+    
+    function ProcessConfigFile ($filename, $optionsProperty = 'configOptions') {
+      /** PRIVATE
+        *   Reads the configuration file specified by $filename.
+        *   Configuration options are validated based on the information
+        *     in the $this->validConfigOptions array and the valid
+        *     values are stored in $this->configOptions array.
+        *   $optionsProperty allows you to specify a different
+        *     class property to store the valid options in instead
+        *     of using the $this->configOptions array.
+        */
+
+      $this->debug('ProcessConfigFile('.$filename.', '.$optionsProperty.') called', 1);
+      
+      // assume the file is read and processed successfully
+      $result = true;
+      
+      // make sure the configuration file exists
+      if (!file_exists($filename)) {
+        $this->errorMsg = 'The configuration file you specified ('.$filename.') does not exist.';
+        $this->errorType = 'error';
+        $this->debug();
+        $result = false;
+        
+      } else {
+        $this->debug('   filename ('.$filename.') exists, open it for reading', 2);
+        // open the config file for reading
+        if (!($configFile = fopen($filename, 'r'))) {
+          $this->errorMsg = 'The configuration file ('.$filename.') could not be '.
+                            'opened for reading. Please check your permissions.';
+          $this->errorType = 'error';
+          $this->debug();
+          $result = false;
+          
+        } else {
+          $this->debug('   config file has been opened for reading', 2);
+          // build an array of config options indexed by the file tag
+          $validFileTags = array();
+          foreach ($this->validConfigOptions as $key => $data) {
+            if (isset($data['filetag']) && $data['filetag'] <> '') {
+              $validFileTags[strtolower($data['filetag'])] = $data;
+            }
+          }
+          
+          // read and process the config file
+          $this->debug('   while loop to read through the config file', 2);
+          while (!feof($configFile)) {
+            // get a line from the file
+            $line = trim(fgets($configFile));
+            
+            // ignore blank lines and lines that start with a hash (#)
+            if ($line <> '' && substr($line, 0, 1) <> '#') {
+              $this->debug('   line is not blank and not a comment', 2);
+              // it's a valid line, look for a equals
+              if (strpos($line, '=') !== false) {
+                $this->debug('   line contained an equals sign', 2);
+                // split the line into a tag and a value
+                list($tag, $value) = explode('=', $line, 2);
+                $tag = trim(strtolower($tag));
+                $tagData = array();
+                $value = trim($value);
+                
+                
+                // validate the tag
+                if (array_key_exists($tag, $validFileTags)) {
+                  $this->debug('   tag ('.$tag.') was valid', 2);
+                  $tagData = $validFileTags[$tag];
+                  $validValue = '';
+                  
+                  // check to see if this option is a value type
+                  if ($tagData['type'] == 'value') {
+                    $this->debug('   tag ('.$tag.') is a value type', 2);
+                    // validate the value if a validator is specified
+                    if ($value <> '' && isset($tagData['validate']) && $tagData['validate'] <> '') {
+                      // if the validation method exists, call it
+                      $validateMethod = $tagData['validate'];
+                      $this->debug('   validating the value. validate method: '.$validateMethod, 2);
+                      if (method_exists($this, $validateMethod)) {
+                        $this->debug('   validate method exists', 2);
+                        if ($this->$validateMethod($value)) {
+                          $this->debug('   the value was valid', 2);
+                          // the value is valid
+                          $validValue = $value;
+                        }
+                      }
+                    }
+                    
+                    // store the value, if a value exists, make it an array of values
+                    if ($validValue <> '') {
+                      $this->debug('   we have a valid value, store it', 2);
+                      $this->StoreConfigOption($tagData['configkey'], $validValue, $optionsProperty);
+                    }
+                  }
+                }                  
+              }
+            }
+          }
+          
+          // close the config file
+          $this->debug('   close the config file', 2);
+          fclose($configFile);
+        }
+      }
+      
+      $this->debug('ProcessConfigFile() ended', 1);
+      
+    }  // end of function ProcessConfigFile
+    
+    
+    
     /**
      * Starts the specified timer by storing the timestamp with microseconds
      * 
