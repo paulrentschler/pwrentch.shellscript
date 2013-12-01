@@ -934,7 +934,7 @@ class ShellScript
      */
     protected function outputError ($fatal = false, $message = '')
     {
-        $this->debug('OutputError('.(($fatal) ? 'true' : 'false').') called', 1);
+        $this->debug('outputError('.(($fatal) ? 'true' : 'false').') called', 1);
 
         // output the word ERROR: in red or bright red if fatal
         $this->cecho('ERROR: ', 'red', $fatal);
@@ -948,7 +948,7 @@ class ShellScript
         // see if this message is fatal and thus stops the script
         if ($fatal) {
             $this->debug('the message is fatal', 2);
-            $this->debug('OutputError() ended with die()', 1);
+            $this->debug('outputError() ended with die()', 1);
             die($message."\n");
 
         } else {
@@ -957,7 +957,7 @@ class ShellScript
             echo $message."\n";
         }
       
-        $this->debug('OutputError() ended', 1);
+        $this->debug('outputError() ended', 1);
     }
     
     
@@ -1023,7 +1023,7 @@ class ShellScript
                 }
             }
 
-            // 2 spaces for an indent and 2 spaces between option and description
+            // indent 2 spaces and 2 spaces between the option and description
             $indent += 4;
             $descLength = 78 - $indent;
             $this->debug('max indent: '.$indent, 2);
@@ -1032,7 +1032,8 @@ class ShellScript
 
 
         $this->debug('outputting the syntax help', 2);
-        echo "-------------------------------------------------------------------------------\n";
+        echo '----------------------------------------------------------------'
+            ."---------------\n";
         foreach ($wrappedDescription as $desc) {
             echo $desc."\n";
         }
@@ -1082,8 +1083,10 @@ class ShellScript
         }
 
         echo "\n";
-        echo "This software comes with ABSOLUTELY NO WARRANTY. Use at your own risk!\n";
-        echo "-------------------------------------------------------------------------------\n\n";
+        echo 'This software comes with ABSOLUTELY NO WARRANTY. '
+            ."Use at your own risk!\n";
+        echo '----------------------------------------------------------------'
+            ."---------------\n";
       
         $this->debug('outputSyntax() ended', 1);
     }
