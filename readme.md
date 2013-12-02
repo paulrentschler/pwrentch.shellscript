@@ -38,18 +38,18 @@ The following methods are provided to validate configuration options. You can
 also define additional validation functions or override and redefine any of
 these.
 
-    * ValidateString
-    * ValidateAlphaString
-    * ValidateAlphaNumericString
-    * ValidateEmailAddress
-    * ValidateDate
-    * ValidateWebUrl
-    * ValidateIPAddress
-    * ValidateFilename
-    * ValidatePath
-    * ValidateLocalPath
-    * ValidateMySQLServer
-    * ValidateMySQLDatabase
+  * ValidateString
+  * ValidateAlphaString
+  * ValidateAlphaNumericString
+  * ValidateEmailAddress
+  * ValidateDate
+  * ValidateWebUrl
+  * ValidateIPAddress
+  * ValidateFilename
+  * ValidatePath
+  * ValidateLocalPath
+  * ValidateMySQLServer
+  * ValidateMySQLDatabase
 
 ### Debug log
 
@@ -68,10 +68,10 @@ log file.
 By default, the following verbosity levels are used for indicating certain
 events.
 
-    * level 0 = outputting the errorMsg property when it's set
-    * level 1 = indicating when methods start and stop and calling parameters
-    * level 2 = conditionals indicated (if, for, while, switch, etc)
-    * level 3 = additional details like variable values
+  * level 0 = outputting the errorMsg property when it's set
+  * level 1 = indicating when methods start and stop and calling parameters
+  * level 2 = conditionals indicated (if, for, while, switch, etc)
+  * level 3 = additional details like variable values
 
 
 ## What's with the name?
