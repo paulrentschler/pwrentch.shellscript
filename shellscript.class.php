@@ -7,9 +7,9 @@
  * Class for creating shell scripts
  *
  * See the readme.md file for additional documentation and usage instructions.
- * 
+ *
  * PHP version 5
- * 
+ *
  * @author     Paul Rentschler <paul@rentschler.ws>
  * @copyright  2009-2013 Paul Allen Rentschler
  * @license    http://opensource.org/licenses/BSD-3-Clause  BSD license 3-clause
@@ -24,7 +24,7 @@
  *
  * Provides the most commonly needed features for creating shell scripts
  * and is intended to be extented to create each shell script.
- * 
+ *
  * @author     Paul Rentschler <paul@rentschler.ws>
  * @since      30 November 2013
  * @since      30 December 2009
@@ -124,12 +124,12 @@ class ShellScript
      * @var        array
      */
     protected $validConfigOptions = array();
-    
 
-    
+
+
     /**
      * Initialize the class
-     * 
+     *
      * @return     void
      * @access     public
      * @author     Paul Rentschler <paul@rentschler.ws>
@@ -160,31 +160,31 @@ class ShellScript
                 'description' => 'Display this syntax help info',
             ),
             array(
-                'shorttag' => 'v', 
-                'longtag' => '', 
-                'filetag' => '', 
-                'configkey' => 'verbose', 
-                'type' => 'switch', 
+                'shorttag' => 'v',
+                'longtag' => '',
+                'filetag' => '',
+                'configkey' => 'verbose',
+                'type' => 'switch',
                 'valuePlaceholder' = '',
-                'validate' => '', 
+                'validate' => '',
                 'combine' => true,
                 'description' => 'Write debugging info to '
                     .$this->debugLogFilename.'. Use multiple times to increase '
                     .'log verbosity.',
             ),
         );
-                                         
+
         $this->debug('__construct() ended', 1);
     }
-    
-    
-    
+
+
+
     /**
      * Echoes text to the screen with optional ANSI color coding
      *
      * Text and background colors are always reset to defaults unless
      * $reset = false.
-     * 
+     *
      * @param      string  $text       a string containing the text to output
      * @param      string  $forecolor  a string indicating the foreground color
      * @param      boolean $bright     a boolean indicating if the foreground
@@ -204,10 +204,10 @@ class ShellScript
         $this->debug('cecho('.$message.', '.$forecolor.', '
             .(($bright) ? 'true' : 'false').', '.$backcolor.', '
             .(($reset) ? 'true' : 'false').') called', 1);
-      
+
         // define the default value
         $default = "\033[0m";
-      
+
         // define the color codes
         $colorCodes = array(
             'black' => 0,
@@ -219,8 +219,8 @@ class ShellScript
             'cyan' => 6,
             'white' => 7,
         );
-      
-      
+
+
         // if the default foreground and background are used, just display the text
         if ($forecolor == 'default' && $backcolor == 'default') {
             $this->debug('foreground and background colors are default', 2);
@@ -248,8 +248,8 @@ class ShellScript
                 $backCode = 40 + ((int) $colorCodes[$backcolor]);
                 $this->debug('setting the background code to: '.$backCode, 2);
             }
-        
-        
+
+
             /* OUTPUT THE COLORED MESSAGE */
             // the color code
             $this->debug('building the escape sequence', 2);
@@ -259,7 +259,7 @@ class ShellScript
             $escapeSeq .= (($backCode <> '') ? ';'.$backCode : '');
             $escapeSeq .= 'm';
             echo $escapeSeq;
-        
+
             // the message
             $msgLength = strlen($message);
             if ($msgLength > 0
@@ -291,15 +291,15 @@ class ShellScript
                 }
             }
         }
-      
+
         $this->debug('cecho() ended', 1);
     }
-    
-    
-    
+
+
+
     /**
      * Write a debug message to the debugging file
-     * 
+     *
      * Outputs a message to the debug log defined by self::debugLogFilename
      * if debug mode is turned on (i.e., self::debugMode == true)
      *
@@ -330,7 +330,7 @@ class ShellScript
         if ($this->debugMode) {
             // indicate if we are outputting the message, yes by default
             $outputMsg = true;
-        
+
             // if a message verbosity level is specified, see if it meets
             // the threshold to be added to the debug log
             if ($verbosityLevel > 0) {
@@ -349,14 +349,14 @@ class ShellScript
                     }
                 }
             }
-        
-        
+
+
             if ($outputMsg) {
                 // use self::errorMsg if $message is blank
                 if (!isset($message) || $message == '') {
                     $message = $this->errorMsg;
                 }
-              
+
                 // remove any carriage returns from the message
                 $message = str_replace("\n", '', $message);
                 $message = str_replace("\r", '', $message);
@@ -365,11 +365,11 @@ class ShellScript
                 for ($i = 2; $i <= $verbosityLevel; $i++) {
                     $message = '    '.$message;
                 }
-              
+
                 // add a date/time stamp and carriage return
                 $stamp = '['.date('Y-m-d H:i:s').'] ';
                 $message = $stamp.$message."\n";
-              
+
                 // output the debug message to the file
                 file_put_contents(
                     $this->debugLogFilename,
@@ -379,12 +379,12 @@ class ShellScript
             }
         }
     }
-    
-    
-    
+
+
+
     /**
      * Formats time into hours, minutes, seconds, and hundredths of a second
-     * 
+     *
      * @param      float $totalSeconds  a float containing the total number of
      *                                  seconds to format
      * @return     string  a string indicating the number of hours, minutes,
@@ -405,7 +405,7 @@ class ShellScript
             $totalSeconds -= ($hours * 3600);
             $this->debug('whole hours: '.$hours, 3);
         }
-      
+
         // break down the remaining totalSeconds into whole minutes
         if ($totalSeconds > 60) {
             $this->debug('totalSeconds is over a minute', 2);
@@ -439,7 +439,7 @@ class ShellScript
      *
      * Used by the self::outputSyntax method for auto-generating the syntax
      * options for the shell script.
-     * 
+     *
      * @param      array  $option  an associative array that represents the
      *                             entry from self::validConfigOptions being
      *                             worked with
@@ -491,12 +491,12 @@ class ShellScript
         $this->debug('generateSyntaxTag() = '.$result.' ended', 1);
         return $result;
     }
-    
-    
-    
+
+
+
     /**
      * Gets the number of elapsed seconds for the specified timer
-     * 
+     *
      * Elapsed seconds are measured in microseconds for accuracy and based
      * on the starting and ending timestamps stored in the $timerProperty array.
      *
@@ -521,7 +521,7 @@ class ShellScript
                 .') exists and is an array', 2);
             if (isset($this->{$timerProperty}['start'])
                 && is_numeric($this->{$timerProperty}['start'])
-                && $this->{$timerProperty}['start'] > 0 
+                && $this->{$timerProperty}['start'] > 0
                 && isset($this->{$timerProperty}['end'])
                 && is_numeric($this->{$timerProperty}['end'])
                 && $this->{$timerProperty}['end'] > 0
@@ -536,12 +536,12 @@ class ShellScript
         $this->debug('getElapsedSeconds() = '.$elapsedSeconds.' ended', 1);
         return $elapsedSeconds;
     }
-      
-    
-    
+
+
+
     /**
      * Gets the current timestamp including microseconds
-     * 
+     *
      * @return     float  a float indicating the current timestamp in microseconds
      * @access     private
      * @author     Paul Rentschler <paul@rentschler.ws>
@@ -558,12 +558,12 @@ class ShellScript
         $this->debug('getMicrotime() = '.$result.' ended', 1);
         return $result;
     }
-    
-    
-    
+
+
+
     /**
      * Prompt the user to enter input and return it
-     * 
+     *
      * @param      string  $prompt  a string containing the prompt to display
      * @param      integer $length  an integer indicating the maximum length
      *                              of the user's input
@@ -582,27 +582,27 @@ class ShellScript
             $this->debug('outputting the provided user prompt', 2);
             echo $prompt;
         }
-      
+
         // collect the user's response
         $this->debug('collecting the user\'s response', 2);
         $STREAM = fopen("php://stdin", "r");
         $input = fgets($STREAM, $length);
         $input = trim($input);
         fclose($STREAM);
-      
+
         // return the response
         $this->debug('getUserInput() = '.$input.' ended', 1);
         return $input;
     }
-    
-    
-    
+
+
+
     /**
      * Outputs the self::errorMsg error message to the user
      *
      * Script execution is halted if $fatal = true along with the message
      * being displayed in bright red.
-     * 
+     *
      * @param      boolean $fatal    a boolean indicating if the error should
      *                               stop script execution
      * @param      string  $message  a string containing the message to display.
@@ -625,7 +625,7 @@ class ShellScript
             $this->debug('no message was provided, using self::errorMsg', 2);
             $message = $this->errorMsg;
         }
-      
+
         // see if this message is fatal and thus stops the script
         if ($fatal) {
             $this->debug('the message is fatal', 2);
@@ -637,12 +637,12 @@ class ShellScript
             // output the message to the user
             echo $message."\n";
         }
-      
+
         $this->debug('outputError() ended', 1);
     }
-    
-    
-    
+
+
+
     /**
      * Displays the syntax of how the script should be called
      *
@@ -650,7 +650,7 @@ class ShellScript
      * available on the command line.
      *
      * This method can be overridden if the output needs to be customized.
-     * 
+     *
      * @return     void
      * @access     public
      * @author     Paul Rentschler <paul@rentschler.ws>
@@ -660,7 +660,7 @@ class ShellScript
     public function outputSyntax ()
     {
         $this->debug('outputSyntax() called', 1);
-      
+
         $wrappedDescription = $this->wrap($this->description, 78);
         $hasOptions = false;
         $this->debug('build array of config options to display', 2);
@@ -745,7 +745,7 @@ class ShellScript
 
                 if ($syntaxOptions['longtag'] <> '') {
                     $this->debug('outputting the long tag', 3);
-                    
+
                     // output the tag
                     $post = $indent - strlen($syntaxOptions['longtag']) - 2;
                     echo $this->pad($syntaxOptions['longtag'], 2, $post);
@@ -770,7 +770,7 @@ class ShellScript
         }
         echo '----------------------------------------------------------------'
             ."---------------\n";
-      
+
         $this->debug('outputSyntax() ended', 1);
     }
 
@@ -779,7 +779,7 @@ class ShellScript
     /**
      * Adds the specified character a specified number of times to the beginning
      * and/or end of the provided text.
-     * 
+     *
      * @param      string  $text  a string containing the text to prepend and/or
      *                            append $char to
      * @param      integer $pre   an integer indicating how many times to
@@ -810,7 +810,7 @@ class ShellScript
             $text += $char;
         }
         $this->debug('appended: ['.$text.']', 3);
-        
+
         $this->debug('pad() = ['.$text.'] ended', 1);
         return $text;
     }
@@ -819,7 +819,7 @@ class ShellScript
 
     /**
      * Reads command line parameters, validates them, and stores them
-     * 
+     *
      * Parameters are validated against self::validConfigOptions and stored
      * in self::configOptions.
      *
@@ -834,7 +834,7 @@ class ShellScript
     protected function processCommandLine ()
     {
         $this->debug('processCommandLine() called', 1);
-      
+
         $this->debug('parameters passed on the command line: '
             .$_SERVER['argc'], 2);
 
@@ -854,7 +854,7 @@ class ShellScript
                     $this->debug('valid long tag: '.$data['longtag'], 3);
                 }
             }
-        
+
             // process the command line arguments
             $this->debug('for loop to process the command line arguments', 2);
             for ($i = 1; $i < $_SERVER['argc']; $i++) {
@@ -896,11 +896,11 @@ class ShellScript
                         $tagData = $validShortTags[$tag];
                     }
                 }
-          
+
                 // process the tag if it exists
                 if ($tag <> '' && is_array($tagData) && count($tagData) > 0) {
                     $this->debug('processing tag ('.$tag.')', 2);
-            
+
                     $configKey = $tagData['configkey'];
                     switch (strtolower($tagData['type']))
                     {
@@ -928,7 +928,7 @@ class ShellScript
                                 $this->configOptions[$configKey] = 1;
                             }
                             break;
-                
+
                         case 'value':
                             $this->debug('tag ('.$tag.') is a value type', 2);
                             $validValue = '';
@@ -982,19 +982,19 @@ class ShellScript
                 }
             }
         }
-      
+
         // indicate that we have read/processed the command line
         $this->debug('all command line arguments processed', 2);
         $this->configurationRead = true;
 
         $this->debug('processCommandLine() ended', 1);
     }
-      
-    
-    
+
+
+
     /**
      * Read the configuration file and update the config options
-     * 
+     *
      * Configuration options in the file are validated against
      * self::validConfigOptions and stored in the class property specified
      * by $optionsProperty. The $optionsProperty variable allows this method
@@ -1016,7 +1016,7 @@ class ShellScript
     ) {
         $this->debug('processConfigFile('.$filename.', '
             .$optionsProperty.') called', 1);
-      
+
         // assume the file is read and processed successfully
         $result = true;
 
@@ -1041,7 +1041,7 @@ class ShellScript
             $this->debug('ProcessConfigFile() ended', 1);
             return;
         }
-          
+
         $this->debug('config file has been opened for reading', 2);
         // build an array of valid config options indexed by the file tag
         $validFileTags = array();
@@ -1050,13 +1050,13 @@ class ShellScript
                 $validFileTags[strtolower($data['filetag'])] = $data;
             }
         }
-          
+
         // read and process the config file
         $this->debug('while loop to read through the config file', 2);
         while (!feof($configFile)) {
             // get a line from the file
             $line = trim(fgets($configFile));
-            
+
             // ignore blank lines and lines that start with a hash (#)
             if ($line <> '' && substr($line, 0, 1) <> '#') {
                 $this->debug('line is not blank and not a comment', 2);
@@ -1070,8 +1070,8 @@ class ShellScript
                     $value = trim($value);
                     $this->debug('tag: '.$tag, 3);
                     $this->debug('value: '.$value, 3);
-                
-                
+
+
                     // validate the tag
                     if (array_key_exists($tag, $validFileTags)) {
                         $this->debug('tag ('.$tag.') was valid', 2);
@@ -1116,19 +1116,19 @@ class ShellScript
                 }
             }
         }
-          
+
         // close the config file
         $this->debug('close the config file', 2);
         fclose($configFile);
-      
+
         $this->debug('processConfigFile() ended', 1);
     }
-    
-    
-    
+
+
+
     /**
      * Starts the specified timer by storing the timestamp with microseconds
-     * 
+     *
      * @param      string $timerProperty  a string indicating the class property
      *                                    that holds the starting and ending
      *                                    timestamps
@@ -1149,12 +1149,12 @@ class ShellScript
 
         $this->debug('startTimer() ended', 1);
     }
-    
-    
-    
+
+
+
     /**
      * Stops the specified timer by storing the timestamp with microseconds
-     * 
+     *
      * @param      string $timerProperty  a string indicating the class property
      *                                    that holds the starting and ending
      *                                    timestamps
@@ -1176,12 +1176,12 @@ class ShellScript
 
         $this->debug('stopTimer() ended', 1);
     }
-    
-    
-    
+
+
+
     /**
      * Stores a value in the config options array
-     * 
+     *
      * If the options array has an existing value that matches $value, nothing
      * is changed.
      *
@@ -1205,7 +1205,7 @@ class ShellScript
     ) {
         $this->debug('storeConfigOption('.$configKey.', '.$value.', '
             .$optionsProperty.') called', 1);
-      
+
         if (array_key_exists($configKey, $this->{$optionsProperty})) {
             $this->debug('configKey ('.$configKey.') exists', 2);
             // it exists, do the current and new values match?
@@ -1233,15 +1233,15 @@ class ShellScript
                 .'['.$configKey.']', 2);
             $this->{$optionsProperty}[$configKey] = $value;
         }
-      
+
         $this->debug('storeConfigOption() ended', 1);
     }
-          
-    
+
+
 
     /**
      * Word wraps text to a maximum length
-     * 
+     *
      * @param      string  $text       a string containing the text to word wrap
      * @param      integer $maxLength  an integer indicating the maximum length
      *                                 of the text before it must be wrapped
@@ -1271,435 +1271,461 @@ class ShellScript
         $this->debug('wrap() = array('.$index.') ended', 1);
         return $wrapped;
     }
-    
-    
+
+
 
 
     /********************************************************************
      *   VALIDATION METHODS
      ********************************************************************/
-    
-    function ValidateString ($text) {
-      /** PRIVATE
-        *   Validate the text provided contains valid characters
-        */
-      
-      $this->debug('ValidateString('.$text.') called', 1);
-      
-      // assume it will be valid
-      $this->errorMsg = '';
-      $this->errorType = '';
-      $result = true;
-      
-      // To be valid:
-      //   - the text has to contain letters, numbers, and a few select symbols
-      
-      $pattern = '/^[a-z0-9\x20!\[\]{}()\\\\\/@#\$%\^&\*\-_\+=:;\'\",\.\?]*$/Di';
-      if (!preg_match($pattern, $text)) {
-        $this->errorMsg = 'The string contains one or more invalid characters. '.
-                          'The string can contain letters, numbers, spaces and the '.
-                          'following symbols: !@#$()[]{}\\/%^&*-_+=:;\'",.?';
-        $this->errorType = 'error';
-        $this->debug();
-        $result = false;
-      }
-      
-      // return the result
-      $this->debug('ValidateString() = '.(($result) ? 'true' : 'false').' ended', 1);
-      return $result;
-      
-    }  // end of function ValidateString
-    
-    
-    
-    function ValidateAlphaString ($text) {
-      /** PRIVATE
-        *   Validate the text provided contains valid characters
-        */
-      
-      $this->debug('ValidateAlphaString('.$text.') called', 1);
-      
-      // assume it will be valid
-      $this->errorMsg = '';
-      $this->errorType = '';
-      $result = true;
-      
-      // To be valid:
-      //   - the text has to contain letters and spaces
-      
-      $pattern = '/^[a-z\x20]*$/Di';
-      if (!preg_match($pattern, $text)) {
-        $this->errorMsg = 'The string contains one or more invalid characters. '.
-                          'The string can contain only letters and spaces.';
-        $this->errorType = 'error';
-        $this->debug();
-        $result = false;
-      }
-      
-      // return the result
-      $this->debug('ValidateAlphaString() = '.(($result) ? 'true' : 'false').' ended', 1);
-      return $result;
-      
-    }  // end of function ValidateAlphaString
-    
-    
-    
-    function ValidateAlphaNumericString ($text) {
-      /** PRIVATE
-        *   Validate the text provided contains valid characters
-        */
-      
-      $this->debug('ValidateAlphaNumericString('.$text.') called', 1);
-      
-      // assume it will be valid
-      $this->errorMsg = '';
-      $this->errorType = '';
-      $result = true;
-      
-      // To be valid:
-      //   - the text has to contain letters, numbers, and spaces
-      
-      $pattern = '/^[a-z0-9\x20]*$/Di';
-      if (!preg_match($pattern, $text)) {
-        $this->errorMsg = 'The string contains one or more invalid characters. '.
-                          'The string can contain letters, numbers, and spaces.';
-        $this->errorType = 'error';
-        $this->debug();
-        $result = false;
-      }
-      
-      // return the result
-      $this->debug('ValidateAlphaNumericString() = '.(($result) ? 'true' : 'false').' ended', 1);
-      return $result;
-      
-    }  // end of function ValidateAlphaNumericString
-    
-    
-    
-    function ValidateEmailAddress ($address) {
-      /** PRIVATE
-        *   Validate the address provided is a valid e-mail address
-        *     and contains only select characters
-        */
-      
-      $this->debug('ValidateEmailAddress('.$address.') called', 1);
-      
-      // assume it will be valid
-      $this->errorMsg = '';
-      $this->errorType = '';
-      $result = true;
-      
-      // To be valid:
-      //   - the text has to contain letters, numbers, and a few select symbols
-      //   - must be in the format: user+extra@domain.tld
-      
-      $pattern = '/^[^@\s<&>]+@([-a-z0-9]+\.)+[a-z]{2,}$/Di';
-      if (!preg_match($pattern, $address)) {
-        $this->errorMsg = 'The e-mail address contains one or more invalid '.
-                          'characters or is not in the correct format. '.
-                          'The e-mail address should be in the format: '.
-                          'username@domain.tld (example: jsmith@yahoo.com).';
-        $this->errorType = 'error';
-        $this->debug();
-        $result = false;
-      }
-      
-      // return the result
-      $this->debug('ValidateEmailAddress() = '.(($result) ? 'true' : 'false').' ended', 1);
-      return $result;
-      
-    }  // end of function ValidateEmailAddress
-    
-    
-    
-    function ValidateDate ($text) {
-      /** PRIVATE
-        *   Validate the date provided contains valid characters
-        *     and is in date format
-        */
-      
-      $this->debug('ValidateDate('.$text.') called', 1);
-      
-      // assume it will be valid
-      $this->errorMsg = '';
-      $this->errorType = '';
-      $result = true;
-      
-      // To be valid:
-      //   - the text has to contain numbers
-      //   - be in the format: #/#/#### or ##/##/####
-      
-      $pattern = '/^\d{1,2}\/\d{1,2}\/\d{4}$/D';    
-      if (!preg_match($pattern, $text)) {
-        $this->errorMsg = 'The date contains one or more invalid characters or '.
-                          'is not in the correct format. The date should be '.
-                          'in the format: m/d/yyyy.';
-        $this->errorType = 'error';
-        $this->debug();
-        $result = false;
-      }
-      
-      // return the result
-      $this->debug('ValidateDate() = '.(($result) ? 'true' : 'false').' ended', 1);
-      return $result;
-      
-    }  // end of function ValidateDate
 
+    /**
+     * Validate the provided text against the provided regular expression
+     *
+     * @param      string $text     a string containing the text to validate
+     * @param      string $pattern  a string providing the regular expression
+     *                              to validate $text against
+     * @param      string $msg      a string providing the error message to
+     *                              output if the validation fails
+     * @return     boolean  a boolean indicating if the text is valid
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      2 December 2013
+     * @since      30 December 2009
+     */
+    protected function validateString ($text, $pattern = '', $msg = '') {
+        $this->debug('validateString('.$text.', '.$pattern.') called', 1);
 
+        // assume it will be valid
+        $this->errorMsg = '';
+        $this->errorType = '';
+        $result = true;
 
-    function ValidateWebUrl ($url) {
-      /** PRIVATE
-        *   Validate the url provided contains valid characters
-        */
-
-      $this->debug('ValidateWebUrl('.$url.') called', 1);
-      
-      // assume it will be valid
-      $this->errorMsg = '';
-      $this->errorType = '';
-      $result = true;
-      
-      // To be valid:
-      //   - the text has to contain letters, numbers, and a few select symbols
-      
-      $pattern = '/^[A-Za-z0-9%&\/\-_\+=:\.\#?]*$/Di';
-      if (!preg_match($pattern, $url)) {
-        $this->errorMsg = 'The url contains one or more invalid characters. '.
-                          'The url can contain letters, numbers, and the '.
-                          'following symbols: #%&-_+=:/.?';
-        $this->errorType = 'error';
-        $this->debug();
-        $result = false;
-      }
-      
-      // return the result
-      $this->debug('ValidateWebUrl() = '.(($result) ? 'true' : 'false').' ended', 1);
-      return $result;
-      
-    }  // end of function ValidateWebUrl
-    
-    
-    
-    function ValidateIPAddress ($ip) {
-      /** PRIVATE
-        *   Validate the ip address provided contains valid characters
-        *     and is in the IPv4 format
-        */
-      
-      $this->debug('ValidateIPAddress('.$ip.') called', 1);
-      
-      // assume it will be valid
-      $this->errorMsg = '';
-      $this->errorType = '';
-      $result = true;
-      
-      // To be valid:
-      //   - the text has to contain numbers
-      //   - be in the format: ###.###.###.###
-      //   - each number must be between 0 and 255
-      
-      $pattern = '/^(((([0-1])?([0-9])?[0-9])|(2[0-4][0-9])|(2[0-5][0-5])))\.(((([0-1])?([0-9])?[0-9])|(2[0-4][0-9])|(2[0-4][0-9])|(2[0-5][0-5])))\.(((([0-1])?([0-9])?[0-9])|(2[0-4][0-9])|(2[0-5][0-5])))\.(((([0-1])?([0-9])?[0-9])|(2[0-4][0-9])|(2[0-5][0-5])))$/Di';
-      if (!preg_match($pattern, $ip)) {
-        $this->errorMsg = 'The ip address contains one or more invalid characters '.
-                          'or is not in the correct format. The ip address should be '.
-                          'in the format #.#.#.# where each # ranges from 0 to 255 '.
-                          '(ex: 127.0.0.1).';
-        $this->errorType = 'error';
-        $this->debug();
-        $result = false;
-      }
-      
-      // return the result
-      $this->debug('ValidateIPAddress() = '.(($result) ? 'true' : 'false').' ended', 1);
-      return $result;
-      
-    }  // end of function ValidateIPAddress
-    
-    
-    
-    function ValidateFilename ($filename) {
-      /** PRIVATE
-        *   Validate the filename provided contains valid characters
-        */
-      
-      $this->debug('ValidateFilename('.$filename.') called', 1);
-      
-      // assume it will be valid
-      $this->errorMsg = '';
-      $this->errorType = '';
-      $result = true;
-      
-      // To be valid:
-      //   - the filename has to contain letters, numbers, and a few select symbols
-
-      // see if only valid characters exist in the path
-      $pattern = '/^[a-z0-9\x20\[\]{}()\/@#\$%\^&\-_\+=;\',\.`~]*$/Di';
-      if (!preg_match($pattern, $filename)) {
-        $this->errorMsg = 'The filename contains one or more invalid characters. ';
-        $this->errorType = 'error';
-        $this->debug();
-        $result = false;
-      }
-      
-      // return the result
-      $this->debug('ValidateFilename() = '.(($result) ? 'true' : 'false').' ended', 1);
-      return $result;
-      
-    }  // end of function ValidateFilename
-    
-    
-    
-    function ValidatePath (&$path) {
-      /** PRIVATE
-        *   Validate the path provided contains valid characters
-        *   $path = the path to check passed by reference so
-        *     an ending slash (/) can be added if it's not present
-        */
-      
-      $this->debug('ValidatePath('.$path.') called', 1);
-      
-      // assume it will be valid
-      $this->errorMsg = '';
-      $this->errorType = '';
-      $result = true;
-      
-      // To be valid:
-      //   - the path has to contain letters, numbers, and a few select symbols
-
-      // see if only valid characters exist in the path
-      if ($this->ValidateFilename($path)) {
-        // make sure it ends with a slash
-        if (substr($path, -1, 1) <> '/') {
-          $this->debug('   path ('.$path.') did not end in a slash, adding it', 2);
-          $path .= '/';
+        // set the default values for pattern and msg
+        if ($pattern == '') {
+            $pattern = '/^[a-z0-9\x20!\[\]{}()\\\\\/@#\$%\^&\*\-_\+=:;\'\",\.\?]*$/Di';
         }
-          
-      } else {
-        $this->errorMsg = 'The path contains one or more invalid characters. ';
-        $this->errorType = 'error';
-        $this->debug();
-        $result = false;
-      }
-      
-      // return the result
-      $this->debug('ValidatePath() = '.(($result) ? 'true' : 'false').' ended', 1);
-      return $result;
-      
-    }  // end of function ValidatePath
-    
-    
-    
-    function ValidateLocalPath (&$path) {
-      /** PRIVATE
-        *   Validate the path provided is valid and exists
-        *     on the file system
-        *   $path = the path to check passed by reference so
-        *     an ending slash (/) can be added if it's not present
-        */
-      
-      $this->debug('ValidateLocalPath('.$path.') called', 1);
-      
-      // assume it will be valid
-      $this->errorMsg = '';
-      $this->errorType = '';
-      $result = true;
-      
-      // To be valid:
-      //   - the path has to contain letters, numbers, and a few select symbols
-      //   - the directory has to exist and be a directory
-
-      // see if only valid characters exist in the path
-      if ($this->ValidatePath($path)) {
-        $this->debug('   path ('.$path.') contains valid characters', 2);
-        // see if the path exists and is a directory
-        if (!(file_exists($path) && is_dir($path))) {
-          $this->errorMsg = 'The path specified ('.$path.') does not exist.';
-          $this->errorType = 'error';
-          $this->debug();
-          $result = false;
+        if ($msg == '') {
+            $msg = 'The string contains one or more invalid '
+                .'characters. The string can contain letters, numbers, spaces '
+                .'and the following symbols: !@#$()[]{}\\/%^&*-_+=:;\'",.?';
         }
-        
-      } else {
-        // $this->errorMsg and $this->errorType are set from calling ValidatePath
-        $result = false;
-      }
-      
-      // return the result
-      $this->debug('ValidateLocalPath() = '.(($result) ? 'true' : 'false').' ended', 1);
-      return $result;
-      
-    }  // end of function ValidateLocalPath
-    
-    
-    
-    function ValidateMySQLServer ($server) {
-      /** PRIVATE
-        *   Validate the MySQL server name
-        */
-      
-      $this->debug('ValidateMySQLServer('.$server.') called', 1);
-      
-      // assume it will be valid
-      $this->errorMsg = '';
-      $this->errorType = '';
-      $result = true;
-      
-      
-      // To be valid:
-      //   - must contain only letters, numbers, and select symbols
-      
-      $pattern = '/^[a-zA-Z0-9\.-_]*$/Di';
-      if (!preg_match($pattern, $server)) {
-        $this->errorMsg = 'The MySQL server you specified '.
-                          'is not valid. The server name can contain '.
-                          'only letters, numbers, and the following symbols: .-_';
-        $this->errorType = 'error';
-        $this->debug();
-        $result = false;
-      }
-      
-      
-      // return the result
-      $this->debug('ValidateMySQLServer() = '.(($result) ? 'true' : 'false').' ended', 1);
-      return $result;
-      
-    }  // end of function ValidateMySQLServer
-    
-    
-    
-    function ValidateMySQLDatabase ($database) {
-      /** PRIVATE
-        *   Validate the MySQL database
-        *   $database = the MySQL database name
-        */
-      
-      $this->debug('ValidateMySQLDatabase('.$database.') called', 1);
-      
-      // assume it will be valid
-      $this->errorMsg = '';
-      $this->errorType = '';
-      $result = true;
-      
-      
-      // To be valid:
-      //   - must contain only letters, numbers, dashes, and underlines
-      $pattern = '/^[a-zA-Z0-9-_]*$/Di';
-      if (!preg_match($pattern, $database)) {
-        $this->errorMsg = 'The MySQL database you specified '.
-                          'is not valid. The database name can contain '.
-                          'only letters, numbers, dashes, and underlines.';
-        $this->errorType = 'error';
-        $this->debug();
-        $result = false;
-      }
-      
-      
-      // return the result
-      $this->debug('ValidateMySQLDatabase() = '.(($result) ? 'true' : 'false').' ended', 1);
-      return $result;
-      
-    }  // end of function ValidateMySQLDatabase
-    
-  }  // end of class ShellScript
-   
+        if (!preg_match($pattern, $text)) {
+            $this->errorMsg = $msg;
+            $this->errorType = 'error';
+            $this->debug();
+            $result = false;
+        }
+
+        // return the result
+        $this->debug('validateString() = '
+            .(($result) ? 'true' : 'false').' ended', 1);
+        return $result;
+    }
+
+
+
+    /**
+     * Validate text to ensure it contains only alphabetical characters
+     *
+     * @param      string $text  a string containing the text to validate
+     * @return     boolean  a boolean indicating if the text is valid
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      2 December 2013
+     * @since      30 December 2009
+     */
+    protected function validateAlphaString ($text)
+    {
+        $this->debug('validateAlphaString('.$text.') called', 1);
+
+        // define the pattern
+        $pattern = '/^[a-z\x20]*$/Di';
+
+        // define the error message if it's invalid
+        $errorMsg = 'The string contains one or more invalid characters. '
+            .'The string can contain only letters and spaces.';
+
+        // validate the text
+        $result = $this->validateString($text, $pattern, $errorMsg);
+
+        // return the result
+        $this->debug('validateAlphaString() = '
+            .(($result) ? 'true' : 'false').' ended', 1);
+        return $result;
+    }
+
+
+
+    /**
+     * Validate text to ensure it contains only alphabetical and numerical
+     * characters
+     *
+     * @param      string $text  a string containing the text to validate
+     * @return     boolean  a boolean indicating if the text is valid
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      2 December 2013
+     * @since      30 December 2009
+     */
+    protected function validateAlphaNumericString ($text)
+    {
+        $this->debug('validateAlphaNumericString('.$text.') called', 1);
+
+        // define the pattern
+        $pattern = '/^[a-z0-9\x20]*$/Di';
+
+        // define the error message if it's invalid
+        $errorMsg = 'The string contains one or more invalid characters. '
+            .'The string can contain letters, numbers, and spaces.';
+
+        // validate the text
+        $result = $this->validateString($text, $pattern, $errorMsg);
+
+        // return the result
+        $this->debug('validateAlphaNumericString() = '
+            .(($result) ? 'true' : 'false').' ended', 1);
+        return $result;
+    }
+
+
+
+    /**
+     * Validate the text provided is a valid email address
+     *
+     * @param      string $address  a string containing the email address to
+     *                              validate
+     * @return     boolean  a boolean indicating if the address is valid
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      2 December 2013
+     * @since      30 December 2009
+     */
+    protected function validateEmailAddress ($address)
+    {
+        $this->debug('validateEmailAddress('.$address.') called', 1);
+
+        // define the pattern
+        $pattern = '/^[^@\s<&>]+@([-a-z0-9]+\.)+[a-z]{2,}$/Di';
+
+        // define the error message if it's invalid
+        $errorMsg = 'The e-mail address contains one or more invalid '
+            .'characters or is not in the correct format. '
+            .'The e-mail address should be in the format: '
+            .'username@domain.tld (example: jsmith@yahoo.com).';
+
+        // validate the text
+        $result = $this->validateString($address, $pattern, $errorMsg);
+
+        // return the result
+        $this->debug('validateEmailAddress() = '
+            .(($result) ? 'true' : 'false').' ended', 1);
+        return $result;
+    }
+
+
+
+    /**
+     * Validate the text is a valid date in the format ##/##/####
+     *
+     * @param      string $text  a string containing the date to validate
+     * @return     boolean  a boolean indicating if the date is valid
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      2 December 2013
+     * @since      30 December 2009
+     */
+    protected function validateDate ($text)
+    {
+        $this->debug('validateDate('.$text.') called', 1);
+
+        // define the pattern
+        $pattern = '/^\d{1,2}\/\d{1,2}\/\d{4}$/D';
+
+        // define the error message if it's invalid
+        $errorMsg = 'The date contains one or more invalid characters or '
+            .'is not in the correct format. The date should be '
+            .'in the format: m/d/yyyy.';
+
+        // validate the text
+        $result = $this->validateString($text, $pattern, $errorMsg);
+
+        // return the result
+        $this->debug('validateDate() = '
+            .(($result) ? 'true' : 'false').' ended', 1);
+        return $result;
+    }
+
+
+
+    /**
+     * Validate the text is a valid web site address (url)
+     *
+     * @param      string $url  a string containing the web address to validate
+     * @return     boolean  a boolean indicating if the web address is valid
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      2 December 2013
+     * @since      30 December 2009
+     */
+    protected function validateWebUrl ($url)
+    {
+        $this->debug('validateWebUrl('.$url.') called', 1);
+
+        // define the pattern
+        $pattern = '/^[A-Za-z0-9%&\/\-_\+=:\.\#?]*$/Di';
+
+        // define the error message if it's invalid
+        $errorMsg = 'The url contains one or more invalid characters. '
+            .'The url can contain letters, numbers, and the '
+            .'following symbols: #%&-_+=:/.?';
+
+        // validate the text
+        $result = $this->validateString($url, $pattern, $errorMsg);
+
+        // return the result
+        $this->debug('validateWebUrl() = '
+            .(($result) ? 'true' : 'false').' ended', 1);
+        return $result;
+    }
+
+
+
+    /**
+     * Validate the text is a valid IP address in the IPv4 format
+     *
+     * @param      string $ip  a string containing the ip address to validate
+     * @return     boolean  a boolean indicating if the ip address is valid
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      2 December 2013
+     * @since      30 December 2009
+     */
+    protected function validateIPAddress ($ip)
+    {
+        $this->debug('validateIPAddress('.$ip.') called', 1);
+
+        // define the pattern
+        $pattern = '/^(((([0-1])?([0-9])?[0-9])|(2[0-4][0-9])|(2[0-5][0-5])))'
+            .'\.(((([0-1])?([0-9])?[0-9])|(2[0-4][0-9])|(2[0-4][0-9])|(2[0-5][0-5])))'
+            .'\.(((([0-1])?([0-9])?[0-9])|(2[0-4][0-9])|(2[0-5][0-5])))'
+            .'\.(((([0-1])?([0-9])?[0-9])|(2[0-4][0-9])|(2[0-5][0-5])))$/Di';
+
+        // define the error message if it's invalid
+        $errorMsg = 'The ip address contains one or more invalid characters '
+           .'or is not in the correct format. The ip address should be '
+           .'in the format #.#.#.# where each # ranges from 0 to 255 '
+           .'(ex: 127.0.0.1).';
+
+        // validate the text
+        $result = $this->validateString($ip, $pattern, $errorMsg);
+
+        // return the result
+        $this->debug('validateIPAddress() = '
+            .(($result) ? 'true' : 'false').' ended', 1);
+        return $result;
+    }
+
+
+
+    /**
+     * Validate the text is a valid filename
+     *
+     * @param      string $filename  a string containing the filename to validate
+     * @return     boolean  a boolean indicating if the filename is valid
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      2 December 2013
+     * @since      30 December 2009
+     */
+    protected function validateFilename ($filename)
+    {
+        $this->debug('validateFilename('.$filename.') called', 1);
+
+        // define the pattern
+        $pattern = '/^[a-z0-9\x20\[\]{}()\/@#\$%\^&\-_\+=;\',\.`~]*$/Di';
+
+        // define the error message if it's invalid
+        $errorMsg = 'The filename contains one or more invalid characters. ';
+
+        // validate the text
+        $result = $this->validateString($filename, $pattern, $errorMsg);
+
+        // return the result
+        $this->debug('validateFilename() = '.(($result) ? 'true' : 'false').' ended', 1);
+        return $result;
+    }
+
+
+
+    /**
+     * Validate the text is a valid file path
+     *
+     * $path is passed by reference so that if the path does not end with
+     * a slash (/), one is appended to the end.
+     *
+     * @param      string $path  a string containing the path to validate
+     * @return     boolean  a boolean indicating if the path is valid
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      2 December 2013
+     * @since      30 December 2009
+     */
+    protected function validatePath (&$path)
+    {
+        $this->debug('validatePath('.$path.') called', 1);
+
+        // assume it will be valid
+        $this->errorMsg = '';
+        $this->errorType = '';
+        $result = true;
+
+        // see if only valid characters exist in the path
+        if ($this->validateFilename($path)) {
+            // make sure it ends with a slash
+            if (substr($path, -1, 1) <> '/') {
+                $this->debug('path ('.$path.') did not end in a slash, '
+                    .'adding it', 2);
+                $path .= '/';
+            }
+
+        } else {
+            $this->errorMsg = 'The path contains one or more invalid '
+                .'characters. ';
+            $this->errorType = 'error';
+            $this->debug();
+            $result = false;
+        }
+
+        // return the result
+        $this->debug('validatePath() = '
+            .(($result) ? 'true' : 'false').' ended', 1);
+        return $result;
+    }
+
+
+
+    /**
+     * Validate the text is a valid file path and exists on the file system
+     *
+     * $path is passed by reference so that if the path does not end with
+     * a slash (/), one is appended to the end.
+     *
+     * @param      string $path  a string containing the path to validate
+     * @return     boolean  a boolean indicating if the path is valid
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      2 December 2013
+     * @since      30 December 2009
+     */
+    protected function validateLocalPath (&$path)
+    {
+        $this->debug('validateLocalPath('.$path.') called', 1);
+
+        // assume it will be valid
+        $this->errorMsg = '';
+        $this->errorType = '';
+        $result = true;
+
+        // see if only valid characters exist in the path
+        if ($this->validatePath($path)) {
+            $this->debug('path ('.$path.') contains valid characters', 2);
+
+            // see if the path exists and is a directory
+            if (!(file_exists($path) && is_dir($path))) {
+                $this->errorMsg = 'The path specified ('.$path
+                    .') does not exist or is not a directory.';
+                $this->errorType = 'error';
+                $this->debug();
+                $result = false;
+            }
+
+        } else {
+            // self::errorMsg and self::errorType are set self::validatePath()
+            $result = false;
+        }
+
+        // return the result
+        $this->debug('validateLocalPath() = '
+            .(($result) ? 'true' : 'false').' ended', 1);
+        return $result;
+    }
+
+
+
+    /**
+     * Validate the text is a valid MySQL server name
+     *
+     * @param      string $server  a string containing the server name to
+     *                             validate
+     * @return     boolean  a boolean indicating if the server name is valid
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      2 December 2013
+     * @since      30 December 2009
+     */
+    protected function validateMySQLServer ($server)
+    {
+        $this->debug('validateMySQLServer('.$server.') called', 1);
+
+        // define the pattern
+        $pattern = '/^[a-zA-Z0-9\.-_]*$/Di';
+
+        // define the error message if it's invalid
+        $errorMsg = 'The MySQL server you specified is not valid. '
+            .'The server name can contain only letters, numbers, and '
+            .'the following symbols: .-_';
+
+        // validate the text
+        $result = $this->validateString($server, $pattern, $errorMsg);
+
+        // return the result
+        $this->debug('validateMySQLServer() = '
+            .(($result) ? 'true' : 'false').' ended', 1);
+        return $result;
+    }
+
+
+
+    /**
+     * Validate the text is a valid MySQL database name
+     *
+     * @param      string $database  a string containing the database name
+     *                               to validate
+     * @return     boolean  a boolean indicating if the database name is valid
+     * @access     protected
+     * @author     Paul Rentschler <paul@rentschler.ws>
+     * @since      2 December 2013
+     * @since      30 December 2009
+     */
+    protected function validateMySQLDatabase ($database)
+    {
+        $this->debug('validateMySQLDatabase('.$database.') called', 1);
+
+        // define the pattern
+        $pattern = '/^[a-zA-Z0-9-_]*$/Di';
+
+        // define the error message if it's invalid
+        $errorMsg = 'The MySQL database you specified is not valid. '
+            .'The database name can contain only letters, numbers, '
+            .'dashes, and underlines.';
+
+        // validate the text
+        $result = $this->validateString($database, $pattern, $errorMsg);
+
+        // return the result
+        $this->debug('validateMySQLDatabase() = '
+            .(($result) ? 'true' : 'false').' ended', 1);
+        return $result;
+    }
+}
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * c-hanging-comment-ender-p: nil
+ * End:
+ */
+
 ?>
