@@ -4,6 +4,8 @@ A PHP class for creating shell scripts.
 
 This class is part of the pwrentch library.
 
+
+
 ## Compatibility
 
 The library is compatible with PHP 5.x. Currently it does not utilize
@@ -11,7 +13,9 @@ namespaces because I still have code that runs on servers with PHP versions
 less than 5.3. When that changes, namespaces will be added.
 
 
+
 ## Installation
+
 
 
 
@@ -21,6 +25,7 @@ The ShellScript class exists to provide functionality for creating your own
 shell script and as such your shell script class will extend ShellScript. In
 doing so, you will need to replicate the tasks performed in the constructor
 or call it using the parent::__construct() syntax.
+
 
 ### Adding command line and/or configuration file options
 
@@ -32,24 +37,26 @@ additional entries to the $this->validConfigOptions array. Use the definition
 of the -h and -v options in the __construct() method as examples of how
 to add additional configuration options.
 
+
 ### Configuration option validation methods
 
 The following methods are provided to validate configuration options. You can
 also define additional validation functions or override and redefine any of
 these.
 
-  * ValidateString
-  * ValidateAlphaString
-  * ValidateAlphaNumericString
-  * ValidateEmailAddress
-  * ValidateDate
-  * ValidateWebUrl
-  * ValidateIPAddress
-  * ValidateFilename
-  * ValidatePath
-  * ValidateLocalPath
-  * ValidateMySQLServer
-  * ValidateMySQLDatabase
+  * validateString
+  * validateAlphaString
+  * validateAlphaNumericString
+  * validateEmailAddress
+  * validateDate
+  * validateWebUrl
+  * validateIPAddress
+  * validateFilename
+  * validatePath
+  * validateLocalPath
+  * validateMySQLServer
+  * validateMySQLDatabase
+
 
 ### Debug log
 
@@ -57,6 +64,7 @@ By specifying the -v command line option a debugging log file will be created.
 By default the file is created in the current directory and called 'debug.log'.
 You can change the location and name of the log file by updating the
 self::debugLogFilename property.
+
 
 ### Verbosity levels
 
@@ -72,6 +80,7 @@ events.
   * level 1 = indicating when methods start and stop and calling parameters
   * level 2 = conditionals indicated (if, for, while, switch, etc)
   * level 3 = additional details like variable values
+
 
 
 ## What's with the name?
